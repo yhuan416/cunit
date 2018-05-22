@@ -1,0 +1,11 @@
+
+build_ubuntu_cmake:
+  image: ubuntu:17.10
+  script:
+    - |
+      apt-get update
+      apt-get -y install cmake build-essential gcc libncurses5-dev
+      mkdir cmake-build
+      cd cmake-build
+      cmake ../CUnit
+      make -j
