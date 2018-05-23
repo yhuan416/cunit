@@ -7,5 +7,6 @@ build_ubuntu_cmake:
       apt-get -y install cmake build-essential gcc libncurses5-dev
       mkdir cmake-build
       cd cmake-build
-      cmake ../CUnit
+      cmake ..
       make -j
+      ./CUnit/Sources/cunit_test

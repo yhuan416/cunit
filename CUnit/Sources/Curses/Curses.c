@@ -736,8 +736,8 @@ static STATUS curses_suite_level_run(CU_pSuite pSuite)
       }
       else {
         list_tests(pSuite);
-        snprintf(szTemp, STRING_LENGTH, "%s",
-                                        _("Enter number of test to select (1-%u) : "),
+        snprintf(szTemp, STRING_LENGTH, "%s (1-%u) :",
+                                        _("Enter number of test to select"),
                                         pRegistry->uiNumberOfSuites);
         read_input_string(szTemp, szTestNumber, STRING_LENGTH);
         test_num = atol(szTestNumber);
@@ -769,8 +769,8 @@ static STATUS curses_suite_level_run(CU_pSuite pSuite)
       else {
         while (1) {
           list_tests(pSuite);
-          snprintf(szTemp, STRING_LENGTH, "%s",
-                                          _("Enter number of test to select (1-%u) : "),
+          snprintf(szTemp, STRING_LENGTH, "%s (1-%u) : ",
+                                          _("Enter number of test to select"),
                                           pRegistry->uiNumberOfSuites);
           read_input_string(szTemp, szTestNumber, STRING_LENGTH);
           test_num = atol(szTestNumber);
@@ -976,7 +976,7 @@ static void list_suites(CU_pTestRegistry pRegistry)
   CU_pSuite pCurSuite = NULL;
   int i;
   char szTemp[STRING_LENGTH];
-  static size_t width[6];
+  static int width[6];
 
   if (NULL == pRegistry) {
     pRegistry = CU_get_registry();
@@ -1042,7 +1042,7 @@ static void list_tests(CU_pSuite pSuite)
   CU_pTest pCurTest = NULL;
   unsigned int i;
   char szTemp[STRING_LENGTH];
-  static size_t width[3];
+  static int width[3];
 
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);
