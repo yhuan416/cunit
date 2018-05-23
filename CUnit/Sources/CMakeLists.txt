@@ -26,7 +26,12 @@ else()
 endif(CURSES_FOUND)
 
 
-add_library(cunit STATIC
+add_library(cunit-static STATIC
+        ${cunit_srcs})
+target_link_libraries(cunit-static cunit_headers ${cunit_libs})
+set_target_properties(cunit-static PROPERTIES OUTPUT_NAME cunit)
+
+add_library(cunit SHARED
         ${cunit_srcs})
 target_link_libraries(cunit cunit_headers ${cunit_libs})
 
