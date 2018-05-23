@@ -476,7 +476,7 @@ static void list_suites(CU_pTestRegistry pRegistry)
 {
   CU_pSuite pCurSuite = NULL;
   int i;
-  static size_t width[6];
+  static int width[6];
 
   if (NULL == pRegistry) {
     pRegistry = CU_get_registry();
@@ -492,7 +492,7 @@ static void list_suites(CU_pTestRegistry pRegistry)
 
   /* only need to calculate formatting widths once */
   if (0 == width[0]) {
-    width[0] = CU_number_width(pRegistry->uiNumberOfSuites) + 1;
+    width[0] = (int) CU_number_width(pRegistry->uiNumberOfSuites) + 1;
     width[1] = 34;
     width[2] = CU_MAX(strlen(_("Init?")), CU_MAX(f_yes_width, f_no_width)) + 1;
     width[3] = CU_MAX(strlen(_("Cleanup?")), CU_MAX(f_yes_width, f_no_width)) + 1;
@@ -533,7 +533,7 @@ static void list_tests(CU_pSuite pSuite)
 {
   CU_pTest pCurTest = NULL;
   unsigned int uiCount;
-  static size_t width[3];
+  static int width[3];
 
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);

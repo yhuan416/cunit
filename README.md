@@ -1,6 +1,8 @@
 
-			CUnit : A Unit Testing Framework
-			  http://cunit.sourceforge.net
+# CUnit : A Unit Testing Framework
+			               
+http://gitlab.com/cunity/cunit - forked from http://cunit.sourceforge.net
+
 
 CUnit is a Unit testing framework for C.
 
@@ -20,20 +22,19 @@ Note - the windows-specific gui interface is not yet written.  It is
 still necessary to use either the automated, basic, or console
 interfaces to CUnit on Windows at this time.
 
--------------------------------------------------------
-Important Note - Changes to CUnit Structure & Interface
--------------------------------------------------------
+
+## Important Note - Changes to CUnit Structure & Interface
 
 As of version 2.0, the interface functions used to interact with the
 CUnit framework have changed.  The original interface did not attempt
 to protect user code from name clashes with public CUnit functions and
 variables.  To minimize such name clashes, all CUnit public functions
-are now prefixed with 'CU_'.
+are now prefixed with `CU_`.
 
 The old public names are deprecated as of Version 2.0, but continue
 to be supported with conversion macros.  In order to compile older code
 using the original interface, it is now necessary to compile with the
-macro -USE_DEPRECATED_CUNIT_NAMES defined.  If there are any problems
+macro `-USE_DEPRECATED_CUNIT_NAMES` defined.  If there are any problems
 compiling older code, please file a bug report.
 
 In addition, the DTD and XSL files for output from the automated test
@@ -51,7 +52,7 @@ original CUnit structure included global variables error_number and
 g_pTestRegistry which have been removed from the global namespace as
 of Version 2.0.  Any user code which directly accessed these variables
 will break.  The variables must be retrieved using the accessor
-functions CU__get_error() and CU_get_registry().
+functions `CU__get_error()` and `CU_get_registry()`.
 
 Similarly, user code retrieving the active test registry and directly
 manipulating the uiNumberOfFailures or pResult members will break.
@@ -62,14 +63,30 @@ Another change in Version 2.0 is the update of the framework terminology.
 What were termed 'test groups' in the original structure are now called
 "suites", and "test cases" are now just "tests".  This change was made to
 bring CUnit in conformance with standard testing terminology, and results
-in a change in the name of some functions (e.g. run_group_tests() is
-now CU_run_suite().
+in a change in the name of some functions (e.g. `run_group_tests()` is
+now `CU_run_suite()`.
 
----------------------------------------
-Building the CUnit Library and Examples
----------------------------------------
+## Building CUnit
 
-All Platforms:
+CUnit now builds using CMake (http://www.cmake.org) as such, it should build
+on all cmake platforms including windows and linux without any changes (if 
+it does not please log a bug)
+
+Eg, on linux, you would do:-
+
+```
+mkdir local-build
+cd local-build
+cmake ..
+cmake --build .
+```
+
+The above should result in a `./CUnit/Sources/libcunit.a` file for your platform
+and a self-test program at `./CUnit/Sources/cunit_test`
+
+## Building the CUnit Library and Examples (Old Style)
+
+### All Platforms:
 
   As of Version 2.0, a set of Jamfiles is provided for cross-platform
   building of the library, examples, and tests.  The jam build system was
@@ -107,7 +124,7 @@ All Platforms:
 
     4. jam -f Jambase install
 
-Linux:
+### Linux:
 
   In addition to jam, the standard GNU build system is still supported.
   The usual sequence of steps should succeed in building and installing CUnit:
@@ -127,7 +144,7 @@ Linux:
     5. HTML users guide in the doc subdirectory of the installation path.
     6. Example & test programs in the share subdirectory of the install path.
 
-Windows:
+### Windows:
 
   Jam is the preferred build system for Windows.  A set of old VC6 project
   files is included which have been partially updated but not tested.  If
