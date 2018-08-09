@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
   }
 
   if (CU_TRUE == Run) {
+    CU_automated_enable_junit_xml(CU_TRUE);
     if (CU_initialize_registry()) {
       printf("\nInitialization of Test Registry failed.");
     }

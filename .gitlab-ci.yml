@@ -4,9 +4,12 @@ build_ubuntu_cmake:
   script:
     - |
       apt-get update
-      apt-get -y install cmake build-essential gcc libncurses5-dev
+      apt-get -y install cmake build-essential gcc libncurses5-dev python-pip
+      pip install junit2html
       mkdir cmake-build
       cd cmake-build
       cmake ..
-      make -j
+      cmake --build . -- -j4
       ./CUnit/Sources/cunit_test
+      ./Examples/AutomatedTest/t-automated
+      junit2html --summary-matrix TestAutomated-Results.xml
