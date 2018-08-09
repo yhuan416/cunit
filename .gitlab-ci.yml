@@ -12,4 +12,4 @@ build_ubuntu_cmake:
       cmake --build . -- -j4
       ./CUnit/Sources/cunit_test
       ./Examples/AutomatedTest/t-automated
-      junit2html --summary-matrix Examples/AutomatedTest/TestAutomated-Results.xml
+      junit2html --summary-matrix TestAutomated-Results.xml
