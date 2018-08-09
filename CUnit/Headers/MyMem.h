@@ -74,9 +74,6 @@ extern "C" {
   #define CU_MALLOC(x)            malloc((x))
   /** Standard free() if MEMTRACE not defined. */
   #define CU_FREE(x)              free((x))
-  /** Free then set x to NULL */
-  #define CU_FREE_ZERO(x)           do { CU_FREE(x); x = NULL; } while(0)
-
   /** Standard realloc() if MEMTRACE not defined. */
   #define CU_REALLOC(x, y)        realloc((x), (y))
   /** No-op if MEMTRACE not defined. */
@@ -85,6 +82,8 @@ extern "C" {
   #define CU_DUMP_MEMORY_USAGE(x)
 #endif  /* MEMTRACE */
 
+/** Free then set x to NULL */
+#define CU_FREE_ZERO(x)           do { CU_FREE(x); x = NULL; } while(0)
 #ifdef CUNIT_BUILD_TESTS
 /** Disable memory allocation for testing purposes. */
 void test_cunit_deactivate_malloc(void);
