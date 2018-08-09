@@ -25,6 +25,7 @@
   void         <A HREF="#automated">CU_automated_run_tests</A>(void)
   CU_ErrorCode <A HREF="#automated">CU_list_tests_to_file</A>(void)
   void         <A HREF="#automated">CU_set_output_filename</A>(const char* szFilenameRoot)
+  void         <A HREF="#automated">CU_automated_enable_junit_xml</A>(CU_BOOL bFlag)
 </PRE>
 <P />
 
@@ -134,6 +135,12 @@ and the results are output to an XML file.  A listing of the registered tests
 and suites can also be reported to an XML file.
 <P />
 The following functions comprise the automated interface API:
+
+<P ID="auto-run" CLASS="indent2">
+  <CITE>void <B>CU_automated_enable_junit_xml</B>(CU_BOOL bFlag)</CITE>
+</P>
+<P CLASS="indent5">Sets CUnit's result file output format to JUnit XML</P>
+
 
 <P ID="auto-run" CLASS="indent2"><CITE>void <B>CU_automated_run_tests</B>(void)</CITE></P>
 <P CLASS="indent5">Runs all tests in all registered (and active) suites.  Test results 
