@@ -82,6 +82,7 @@
 #include "MyMem.h"
 #include "TestDB.h"
 #include "TestRun.h"
+#include "MessageHandlers.h"
 #include "Util.h"
 #include "CUnit_intl.h"
 
@@ -91,6 +92,7 @@
 static CU_BOOL   f_bTestIsRunning = CU_FALSE; /**< Flag for whether a test run is in progress */
 static CU_pSuite f_pCurSuite = NULL;          /**< Pointer to the suite currently being run. */
 static CU_pTest  f_pCurTest  = NULL;          /**< Pointer to the test currently being run. */
+
 
 /** CU_RunSummary to hold results of each test run. */
 static CU_RunSummary f_run_summary = {"", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -107,30 +109,6 @@ static CU_BOOL f_failure_on_inactive = CU_TRUE;
 /** Variable for storage of start time for test run. */
 static clock_t f_start_time;
 
-
-/** Pointer to the function to be called before running a suite. */
-static CU_SuiteStartMessageHandler          f_pSuiteStartMessageHandler = NULL;
-
-/** Pointer to the function to be called before running a test. */
-static CU_TestStartMessageHandler           f_pTestStartMessageHandler = NULL;
-
-/** Pointer to the function to be called after running a test. */
-static CU_TestCompleteMessageHandler        f_pTestCompleteMessageHandler = NULL;
-
-/** Pointer to the function to be called when skipping an inactive test. */
-static CU_TestSkippedMessageHandler         f_pTestSkippedMessageHandler = NULL;
-
-/** Pointer to the function to be called after running a suite. */
-static CU_SuiteCompleteMessageHandler       f_pSuiteCompleteMessageHandler = NULL;
-
-/** Pointer to the function to be called when all tests have been run. */
-static CU_AllTestsCompleteMessageHandler    f_pAllTestsCompleteMessageHandler = NULL;
-
-/** Pointer to the function to be called if a suite initialization function returns an error. */
-static CU_SuiteInitFailureMessageHandler    f_pSuiteInitFailureMessageHandler = NULL;
-
-/** Pointer to the function to be called if a suite cleanup function returns an error. */
-static CU_SuiteCleanupFailureMessageHandler f_pSuiteCleanupFailureMessageHandler = NULL;
 
 /*=================================================================
  * Private function forward declarations
@@ -182,97 +160,73 @@ CU_BOOL CU_assertImplementation(CU_BOOL bValue,
 /*------------------------------------------------------------------------*/
 void CU_set_suite_start_handler(CU_SuiteStartMessageHandler pSuiteStartHandler)
 {
-  f_pSuiteStartMessageHandler = pSuiteStartHandler;
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_SUITE_STARTED;
+  handler.func.suite_start = pSuiteStartHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_test_start_handler(CU_TestStartMessageHandler pTestStartHandler)
 {
-  f_pTestStartMessageHandler = pTestStartHandler;
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_TEST_STARTED;
+  handler.func.test_started = pTestStartHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_test_complete_handler(CU_TestCompleteMessageHandler pTestCompleteHandler)
 {
-  f_pTestCompleteMessageHandler = pTestCompleteHandler;
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_TEST_COMPLETED;
+  handler.func.test_completed = pTestCompleteHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_test_skipped_handler(CU_TestSkippedMessageHandler pTestSkippedHandler)
 {
-  f_pTestSkippedMessageHandler = pTestSkippedHandler;
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_TEST_SKIPPED;
+  handler.func.test_skipped = pTestSkippedHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_suite_complete_handler(CU_SuiteCompleteMessageHandler pSuiteCompleteHandler)
 {
-  f_pSuiteCompleteMessageHandler = pSuiteCompleteHandler;
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_SUITE_COMPLETED;
+  handler.func.suite_completed = pSuiteCompleteHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_all_test_complete_handler(CU_AllTestsCompleteMessageHandler pAllTestsCompleteHandler)
 {
-  f_pAllTestsCompleteMessageHandler = pAllTestsCompleteHandler;
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_ALL_COMPLETED;
+  handler.func.all_completed = pAllTestsCompleteHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_suite_init_failure_handler(CU_SuiteInitFailureMessageHandler pSuiteInitFailureHandler)
 {
-  f_pSuiteInitFailureMessageHandler = pSuiteInitFailureHandler;
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_SUITE_SETUP_FAILED;
+  handler.func.suite_setup_failed = pSuiteInitFailureHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_suite_cleanup_failure_handler(CU_SuiteCleanupFailureMessageHandler pSuiteCleanupFailureHandler)
 {
-  f_pSuiteCleanupFailureMessageHandler = pSuiteCleanupFailureHandler;
-}
-
-/*------------------------------------------------------------------------*/
-CU_SuiteStartMessageHandler CU_get_suite_start_handler(void)
-{
-  return f_pSuiteStartMessageHandler;
-}
-
-/*------------------------------------------------------------------------*/
-CU_TestStartMessageHandler CU_get_test_start_handler(void)
-{
-  return f_pTestStartMessageHandler;
-}
-
-/*------------------------------------------------------------------------*/
-CU_TestCompleteMessageHandler CU_get_test_complete_handler(void)
-{
-  return f_pTestCompleteMessageHandler;
-}
-
-/*------------------------------------------------------------------------*/
-CU_TestSkippedMessageHandler CU_get_test_skipped_handler(void)
-{
-  return f_pTestSkippedMessageHandler;
-}
-
-/*------------------------------------------------------------------------*/
-CU_SuiteCompleteMessageHandler CU_get_suite_complete_handler(void)
-{
-  return f_pSuiteCompleteMessageHandler;
-}
-
-/*------------------------------------------------------------------------*/
-CU_AllTestsCompleteMessageHandler CU_get_all_test_complete_handler(void)
-{
-  return f_pAllTestsCompleteMessageHandler;
-}
-
-/*------------------------------------------------------------------------*/
-CU_SuiteInitFailureMessageHandler CU_get_suite_init_failure_handler(void)
-{
-  return f_pSuiteInitFailureMessageHandler;
-}
-
-/*------------------------------------------------------------------------*/
-CU_SuiteCleanupFailureMessageHandler CU_get_suite_cleanup_failure_handler(void)
-{
-  return f_pSuiteCleanupFailureMessageHandler;
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
+  handler.func.suite_teardown_failed = pSuiteCleanupFailureHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
 }
 
 /*------------------------------------------------------------------------*/
@@ -388,11 +342,8 @@ CU_ErrorCode CU_run_all_tests(void)
     f_bTestIsRunning = CU_FALSE;
     f_run_summary.ElapsedTime = ((double)clock() - (double)f_start_time)/(double)CLOCKS_PER_SEC;
 
-    if (NULL != f_pAllTestsCompleteMessageHandler) {
-     (*f_pAllTestsCompleteMessageHandler)(f_failure_list);
-    }
+    CCU_MessageHandler_Run(CUMSG_ALL_COMPLETED, NULL, NULL, f_failure_list);
   }
-
   CU_set_error(result);
   return result;
 }
@@ -400,15 +351,13 @@ CU_ErrorCode CU_run_all_tests(void)
 /*------------------------------------------------------------------------*/
 CU_ErrorCode CU_run_suite(CU_pSuite pSuite)
 {
-  CU_ErrorCode result = CUE_SUCCESS;
+  CU_ErrorCode result = CUE_NOSUITE;
 
   /* Clear results from the previous run */
   clear_previous_results(&f_run_summary, &f_failure_list);
 
-  if (NULL == pSuite) {
-    result = CUE_NOSUITE;
-  }
-  else {
+  if (pSuite != NULL)
+  {
     /* test run is starting - set flag */
     f_bTestIsRunning = CU_TRUE;
     f_start_time = clock();
@@ -420,11 +369,8 @@ CU_ErrorCode CU_run_suite(CU_pSuite pSuite)
     f_run_summary.ElapsedTime = ((double)clock() - (double)f_start_time)/(double)CLOCKS_PER_SEC;
 
     /* run handler for overall completion, if any */
-    if (NULL != f_pAllTestsCompleteMessageHandler) {
-      (*f_pAllTestsCompleteMessageHandler)(f_failure_list);
-    }
+    CCU_MessageHandler_Run(CUMSG_ALL_COMPLETED, NULL, NULL, f_failure_list);
   }
-
   CU_set_error(result);
   return result;
 }
@@ -433,7 +379,7 @@ CU_ErrorCode CU_run_suite(CU_pSuite pSuite)
 CU_ErrorCode CU_run_test(CU_pSuite pSuite, CU_pTest pTest)
 {
   CU_ErrorCode result = CUE_SUCCESS;
-  CU_ErrorCode result2;
+  CU_ErrorCode setupresult = CUE_SUCCESS;
 
   /* Clear results from the previous run */
   clear_previous_results(&f_run_summary, &f_failure_list);
@@ -467,53 +413,45 @@ CU_ErrorCode CU_run_test(CU_pSuite pSuite, CU_pTest pTest)
     pSuite->uiNumberOfTestsSuccess = 0;
 
     /* run handler for suite start, if any */
-    if (NULL != f_pSuiteStartMessageHandler) {
-      (*f_pSuiteStartMessageHandler)(pSuite);
-    }
+    CCU_MessageHandler_Run(CUMSG_SUITE_STARTED, pSuite, NULL, NULL);
 
     /* run the suite initialization function, if any */
     if ((NULL != pSuite->pInitializeFunc) && (0 != (*pSuite->pInitializeFunc)())) {
       /* init function had an error - call handler, if any */
-      if (NULL != f_pSuiteInitFailureMessageHandler) {
-        (*f_pSuiteInitFailureMessageHandler)(pSuite);
-      }
+      CCU_MessageHandler_Run(CUMSG_SUITE_SETUP_FAILED, pSuite, NULL, NULL);
       f_run_summary.nSuitesFailed++;
       add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
                   _("Suite Initialization failed - Suite Skipped"),
                   _("CUnit System"), pSuite, NULL);
-      result = CUE_SINIT_FAILED;
+      result = setupresult = CUE_SINIT_FAILED;
     }
-    /* reach here if no suite initialization, or if it succeeded */
-    else {
-      result2 = run_single_test(pTest, &f_run_summary);
-      result = (CUE_SUCCESS == result) ? result2 : result;
 
+    if (setupresult == CUE_SUCCESS) {
+      /* reach here if no suite initialization, or if it succeeded */
+      result = run_single_test(pTest, &f_run_summary);
+    }
+
+    if (setupresult == CUE_SUCCESS) {
       /* run the suite cleanup function, if any */
       if ((NULL != pSuite->pCleanupFunc) && (0 != (*pSuite->pCleanupFunc)())) {
         /* cleanup function had an error - call handler, if any */
-        if (NULL != f_pSuiteCleanupFailureMessageHandler) {
-          (*f_pSuiteCleanupFailureMessageHandler)(pSuite);
-        }
+        CCU_MessageHandler_Run(CUMSG_SUITE_TEARDOWN_FAILED, pSuite, NULL, NULL);
         f_run_summary.nSuitesFailed++;
         add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
                     0, _("Suite cleanup failed."), _("CUnit System"), pSuite, NULL);
-        result = (CUE_SUCCESS == result) ? CUE_SCLEAN_FAILED : result;
+        result = CUE_SCLEAN_FAILED;
       }
     }
 
     /* run handler for suite completion, if any */
-    if (NULL != f_pSuiteCompleteMessageHandler) {
-      (*f_pSuiteCompleteMessageHandler)(pSuite, NULL);
-    }
+    CCU_MessageHandler_Run(CUMSG_SUITE_COMPLETED, pSuite, NULL, NULL);
 
     /* test run is complete - clear flag */
     f_bTestIsRunning = CU_FALSE;
     f_run_summary.ElapsedTime = ((double)clock() - (double)f_start_time)/(double)CLOCKS_PER_SEC;
 
     /* run handler for overall completion, if any */
-    if (NULL != f_pAllTestsCompleteMessageHandler) {
-      (*f_pAllTestsCompleteMessageHandler)(f_failure_list);
-    }
+    CCU_MessageHandler_Run(CUMSG_SUITE_COMPLETED, NULL, NULL, f_failure_list);
 
     f_pCurSuite = NULL;
   }
@@ -863,9 +801,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
   f_pCurSuite = pSuite;
 
   /* run handler for suite start, if any */
-  if (NULL != f_pSuiteStartMessageHandler) {
-    (*f_pSuiteStartMessageHandler)(pSuite);
-  }
+  CCU_MessageHandler_Run(CUMSG_SUITE_STARTED, pSuite, NULL, NULL);
 
   /* run suite if it's active */
   if (CU_FALSE != pSuite->fActive) {
@@ -873,9 +809,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
     /* run the suite initialization function, if any */
     if ((NULL != pSuite->pInitializeFunc) && (0 != (*pSuite->pInitializeFunc)())) {
       /* init function had an error - call handler, if any */
-      if (NULL != f_pSuiteInitFailureMessageHandler) {
-        (*f_pSuiteInitFailureMessageHandler)(pSuite);
-      }
+      CCU_MessageHandler_Run(CUMSG_SUITE_SETUP_FAILED, pSuite, NULL, NULL);
       pRunSummary->nSuitesFailed++;
       add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
                   _("Suite Initialization failed - Suite Skipped"),
@@ -898,9 +832,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
                         0, _("Test inactive"), _("CUnit System"), pSuite, pTest);
             result = CUE_TEST_INACTIVE;
           }
-          if (NULL != f_pTestSkippedMessageHandler) {
-            (*f_pTestSkippedMessageHandler)(pTest, pSuite);
-          }
+          CCU_MessageHandler_Run(CUMSG_TEST_SKIPPED, pSuite, pTest, NULL);
         }
         pTest = pTest->pNext;
 
@@ -915,9 +847,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
 
       /* call the suite cleanup function, if any */
       if ((NULL != pSuite->pCleanupFunc) && (0 != (*pSuite->pCleanupFunc)())) {
-        if (NULL != f_pSuiteCleanupFailureMessageHandler) {
-          (*f_pSuiteCleanupFailureMessageHandler)(pSuite);
-        }
+        CCU_MessageHandler_Run(CUMSG_SUITE_TEARDOWN_FAILED, pSuite, NULL, NULL);
         pRunSummary->nSuitesFailed++;
         add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
                     0, _("Suite cleanup failed."), _("CUnit System"), pSuite, NULL);
@@ -935,11 +865,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
       result = CUE_SUITE_INACTIVE;
     }
     /* Call the notification function for the tests if there is one */
-    if (NULL != f_pTestSkippedMessageHandler) {
-      for (pTest = pSuite->pTest; pTest != NULL; pTest = pTest->pNext) {
-        (*f_pTestSkippedMessageHandler)(pTest, pSuite);
-      }
-    }
+    CCU_MessageHandler_Run(CUMSG_TEST_SKIPPED, pSuite, NULL, NULL);
   }
 
   /* if additional failures have occurred... */
@@ -956,9 +882,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
   }
 
   /* run handler for suite completion, if any */
-  if (NULL != f_pSuiteCompleteMessageHandler) {
-    (*f_pSuiteCompleteMessageHandler)(pSuite, pLastFailure);
-  }
+  CCU_MessageHandler_Run(CUMSG_SUITE_COMPLETED, pSuite, NULL, pLastFailure);
 
   f_pCurSuite = NULL;
   return result;
@@ -985,21 +909,23 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
   volatile unsigned int nStartFailures;
   /* keep track of the last failure BEFORE running the test */
   volatile CU_pFailureRecord pLastFailure = f_last_failure;
-  jmp_buf buf;
   CU_ErrorCode result = CUE_SUCCESS;
+  jmp_buf* buf;
+
 
   assert(NULL != f_pCurSuite);
   assert(CU_FALSE != f_pCurSuite->fActive);
   assert(NULL != pTest);
   assert(NULL != pRunSummary);
 
+  buf = CU_CALLOC(1, sizeof(*buf));
+  assert(buf && "failed to allocate test jmp_buf");
+
   nStartFailures = pRunSummary->nFailureRecords;
 
   f_pCurTest = pTest;
 
-  if (NULL != f_pTestStartMessageHandler) {
-    (*f_pTestStartMessageHandler)(f_pCurTest, f_pCurSuite);
-  }
+  CCU_MessageHandler_Run(CUMSG_TEST_STARTED, f_pCurSuite, f_pCurTest, NULL);
 
   /* run test if it is active */
   if (CU_FALSE != pTest->fActive) {
@@ -1009,8 +935,8 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
     }
 
     /* set jmp_buf and run test */
-    pTest->pJumpBuf = &buf;
-    if (0 == setjmp(buf)) {
+    pTest->pJumpBuf = buf;
+    if (0 == setjmp(*buf)) {
       if (NULL != pTest->pTestFunc) {
         (*pTest->pTestFunc)();
       }
@@ -1045,10 +971,9 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
     pLastFailure = NULL;                   /* no additional failure - set to NULL */
   }
 
-  if (NULL != f_pTestCompleteMessageHandler) {
-    (*f_pTestCompleteMessageHandler)(f_pCurTest, f_pCurSuite, pLastFailure);
-  }
+  CCU_MessageHandler_Run(CUMSG_TEST_COMPLETED, f_pCurSuite, f_pCurTest, pLastFailure);
 
+  CU_FREE(pTest->pJumpBuf);
   pTest->pJumpBuf = NULL;
   f_pCurTest = NULL;
 
@@ -1405,6 +1330,12 @@ static void test_fail_if_not_setup(void) { CU_TEST(SetUp_Passed); }
 static void suite_setup(void) { SetUp_Passed = CU_TRUE; }
 static void suite_teardown(void) { SetUp_Passed = CU_FALSE; }
 
+static void assert_msg_handlers_empty(void) {
+  int i;
+  for (i = 0; i < CUMSG_MAX; i++){
+    TEST(NULL == CCU_MessageHandler_Get(i));
+  }
+}
 
 /*-------------------------------------------------*/
 /* tests:
@@ -1431,6 +1362,7 @@ static void suite_teardown(void) { SetUp_Passed = CU_FALSE; }
  */
 static void test_message_handlers(void)
 {
+  int i = 0;
   CU_pSuite pSuite1 = NULL;
   CU_pSuite pSuite2 = NULL;
   CU_pSuite pSuite3 = NULL;
@@ -1447,14 +1379,7 @@ static void test_message_handlers(void)
   TEST(!CU_is_test_running());
 
   /* handlers should be NULL on startup */
-  TEST(NULL == CU_get_suite_start_handler());
-  TEST(NULL == CU_get_test_start_handler());
-  TEST(NULL == CU_get_test_complete_handler());
-  TEST(NULL == CU_get_test_skipped_handler());
-  TEST(NULL == CU_get_suite_complete_handler());
-  TEST(NULL == CU_get_all_test_complete_handler());
-  TEST(NULL == CU_get_suite_init_failure_handler());
-  TEST(NULL == CU_get_suite_cleanup_failure_handler());
+  assert_msg_handlers_empty();
 
   /* register some suites and tests */
   CU_initialize_registry();
@@ -1493,14 +1418,14 @@ static void test_message_handlers(void)
   CU_set_suite_cleanup_failure_handler(&suite_cleanup_failure_handler);
 
   /* confirm handlers set properly */
-  TEST(suite_start_handler == CU_get_suite_start_handler());
-  TEST(test_start_handler == CU_get_test_start_handler());
-  TEST(test_complete_handler == CU_get_test_complete_handler());
-  TEST(test_skipped_handler == CU_get_test_skipped_handler());
-  TEST(suite_complete_handler == CU_get_suite_complete_handler());
-  TEST(test_all_complete_handler == CU_get_all_test_complete_handler());
-  TEST(suite_init_failure_handler == CU_get_suite_init_failure_handler());
-  TEST(suite_cleanup_failure_handler == CU_get_suite_cleanup_failure_handler());
+  TEST(suite_start_handler == CCU_MessageHandler_Get(CUMSG_SUITE_STARTED)->func.suite_start);
+  TEST(test_start_handler == CCU_MessageHandler_Get(CUMSG_TEST_STARTED)->func.test_started);
+  TEST(test_complete_handler == CCU_MessageHandler_Get(CUMSG_TEST_COMPLETED)->func.test_completed);
+  TEST(test_skipped_handler == CCU_MessageHandler_Get(CUMSG_TEST_SKIPPED)->func.test_skipped);
+  TEST(suite_complete_handler == CCU_MessageHandler_Get(CUMSG_SUITE_COMPLETED)->func.suite_completed);
+  TEST(test_all_complete_handler == CCU_MessageHandler_Get(CUMSG_ALL_COMPLETED)->func.all_completed);
+  TEST(suite_init_failure_handler == CCU_MessageHandler_Get(CUMSG_SUITE_SETUP_FAILED)->func.suite_setup_failed);
+  TEST(suite_cleanup_failure_handler == CCU_MessageHandler_Get(CUMSG_SUITE_TEARDOWN_FAILED)->func.suite_teardown_failed);
 
   /* run tests again with handlers set */
   clear_test_events();
@@ -1619,7 +1544,7 @@ static void test_message_handlers(void)
     pEvent = pEvent->pNext;
     TEST(TEST_SKIPPED == pEvent->type);
     TEST(pSuite4 == pEvent->pSuite);
-    TEST(pTest7 == pEvent->pTest);
+    TEST(NULL == pEvent->pTest);
     TEST(NULL == pEvent->pFailure);
 
     pEvent = pEvent->pNext;
@@ -1658,14 +1583,7 @@ static void test_message_handlers(void)
   CU_set_suite_init_failure_handler(NULL);
   CU_set_suite_cleanup_failure_handler(NULL);
 
-  TEST(NULL == CU_get_suite_start_handler());
-  TEST(NULL == CU_get_test_start_handler());
-  TEST(NULL == CU_get_test_complete_handler());
-  TEST(NULL == CU_get_test_skipped_handler());
-  TEST(NULL == CU_get_suite_complete_handler());
-  TEST(NULL == CU_get_all_test_complete_handler());
-  TEST(NULL == CU_get_suite_init_failure_handler());
-  TEST(NULL == CU_get_suite_cleanup_failure_handler());
+  assert_msg_handlers_empty();
 
   clear_test_events();
   CU_run_all_tests();

@@ -87,4 +87,5 @@ CU_translate_special_characters
 CU_trim
 CU_trim_left
 CU_trim_right
+CU_automated_enable_junit_xml
 

@@ -41,6 +41,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include <string.h>
+#include <MessageHandlers.h>
 
 #include "CUnit.h"
 #include "TestDB.h"
@@ -164,11 +165,7 @@ static CU_ErrorCode basic_initialize(void)
                     _("CUnit - A unit testing framework for C - Version "),
                     _("http://cunit.sourceforge.net/"));
 
-  CU_set_test_start_handler(basic_test_start_message_handler);
-  CU_set_test_complete_handler(basic_test_complete_message_handler);
-  CU_set_all_test_complete_handler(basic_all_tests_complete_message_handler);
-  CU_set_suite_init_failure_handler(basic_suite_init_failure_message_handler);
-  CU_set_suite_cleanup_failure_handler(basic_suite_cleanup_failure_message_handler);
+  CCU_basic_add_handlers();
 
   return CU_get_error();
 }
@@ -329,6 +326,31 @@ static void basic_suite_cleanup_failure_message_handler(const CU_pSuite pSuite)
 
   if (CU_BRM_SILENT != f_run_mode)
     fprintf(stdout, _("\nWARNING - Suite cleanup failed for '%s'."), pSuite->pName);
+}
+
+void CCU_basic_add_handlers(void)
+{
+  CCU_MessageHandler handler = {0};
+
+  handler.type = CUMSG_TEST_STARTED;
+  handler.func.test_started = basic_test_start_message_handler;
+  CCU_MessageHandler_Add(handler.type, &handler);
+
+  handler.type = CUMSG_TEST_COMPLETED;
+  handler.func.test_completed = basic_test_complete_message_handler;
+  CCU_MessageHandler_Add(handler.type, &handler);
+
+  handler.type = CUMSG_ALL_COMPLETED;
+  handler.func.all_completed = basic_all_tests_complete_message_handler;
+  CCU_MessageHandler_Add(handler.type, &handler);
+
+  handler.type = CUMSG_SUITE_SETUP_FAILED;
+  handler.func.suite_setup_failed = basic_suite_init_failure_message_handler;
+  CCU_MessageHandler_Add(handler.type, &handler);
+
+  handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
+  handler.func.suite_teardown_failed = basic_suite_cleanup_failure_message_handler;
+  CCU_MessageHandler_Add(handler.type, &handler);
 }
 
 /** @} */

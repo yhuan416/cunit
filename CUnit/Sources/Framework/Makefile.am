@@ -3,6 +3,8 @@
 AM_CPPFLAGS = -I$(top_srcdir)/CUnit/Headers
 
 SHARED_SOURCES = \
+    InternalPoolMalloc.c \
+    MessageHandlers.c \
 	CUError.c \
 	MyMem.c \
 	TestDB.c \

@@ -33,6 +33,8 @@ SEARCH_SOURCE +=
   ;
 
 SOURCES =
+  InternalPoolMalloc.c
+  MessageHandlers.c
   CUError.c
   MyMem.c
   TestDB.c
