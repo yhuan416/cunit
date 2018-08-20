@@ -40,6 +40,7 @@
 
 #include "CUnit.h"
 #include "TestDB.h"
+#include "AutomatedJUnitXml.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,11 +84,16 @@ CU_EXPORT void CU_set_output_filename(const char* szFilenameRoot);
 #define set_output_filename(x) CU_set_output_filename((x))
 #endif  /* USE_DEPRECATED_CUNIT_NAMES */
 
-void CU_automated_enable_junit_xml(CU_BOOL bFlag);
 
 void CU_automated_package_name_set(const char *pName);
 
 const char *CU_automated_package_name_get();
+
+/**
+ * Append the automated (xml) test event handlers
+ */
+CU_EXPORT void CCU_automated_add_handlers(void);
+
 
 #ifdef __cplusplus
 }

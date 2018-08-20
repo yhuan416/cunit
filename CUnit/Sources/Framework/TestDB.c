@@ -667,6 +667,7 @@ static CU_pSuite create_suite(const char* strName, CU_InitializeFunc pInit, CU_C
   assert(NULL != strName);
 
   if (NULL != pRetValue) {
+    memset(pRetValue, 0, sizeof(*pRetValue));
     pRetValue->pName = (char *)CU_MALLOC(strlen(strName)+1);
     if (NULL != pRetValue->pName) {
       strcpy(pRetValue->pName, strName);

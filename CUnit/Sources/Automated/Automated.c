@@ -55,6 +55,7 @@
 #include <string.h>
 #include <limits.h>
 #include <time.h>
+#include <MessageHandlers.h>
 
 #include "CUnit.h"
 #include "TestDB.h"
@@ -98,6 +99,36 @@ static void automated_all_tests_complete_message_handler(const CU_pFailureRecord
 static void automated_suite_init_failure_message_handler(const CU_pSuite pSuite);
 static void automated_suite_cleanup_failure_message_handler(const CU_pSuite pSuite);
 
+
+void CCU_automated_add_handlers(void)
+{
+    CCU_MessageHandler handler = {0};
+
+    handler.type = CUMSG_TEST_STARTED;
+    handler.func.test_started = automated_test_start_message_handler;
+    CCU_MessageHandler_Add(handler.type, &handler);
+
+    handler.type = CUMSG_TEST_COMPLETED;
+    handler.func.test_completed = automated_test_complete_message_handler;
+    CCU_MessageHandler_Add(handler.type, &handler);
+
+    handler.type = CUMSG_TEST_SKIPPED;
+    handler.func.test_skipped = automated_test_skipped_message_handler;
+    CCU_MessageHandler_Add(handler.type, &handler);
+
+    handler.type = CUMSG_ALL_COMPLETED;
+    handler.func.all_completed = automated_all_tests_complete_message_handler;
+    CCU_MessageHandler_Add(handler.type, &handler);
+
+    handler.type = CUMSG_SUITE_SETUP_FAILED;
+    handler.func.suite_setup_failed = automated_suite_init_failure_message_handler;
+    CCU_MessageHandler_Add(handler.type, &handler);
+
+    handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
+    handler.func.suite_teardown_failed = automated_suite_cleanup_failure_message_handler;
+    CCU_MessageHandler_Add(handler.type, &handler);
+}
+
 /*=================================================================
  *  Public Interface functions
  *=================================================================*/
@@ -119,12 +150,7 @@ void CU_automated_run_tests(void)
   }
   else {
     /* set up the message handlers for writing xml output */
-    CU_set_test_start_handler(automated_test_start_message_handler);
-    CU_set_test_complete_handler(automated_test_complete_message_handler);
-    CU_set_test_skipped_handler(automated_test_skipped_message_handler);
-    CU_set_all_test_complete_handler(automated_all_tests_complete_message_handler);
-    CU_set_suite_init_failure_handler(automated_suite_init_failure_message_handler);
-    CU_set_suite_cleanup_failure_handler(automated_suite_cleanup_failure_message_handler);
+    CCU_automated_add_handlers();
 
     f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
 
