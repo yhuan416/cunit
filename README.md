@@ -22,6 +22,25 @@ Note - the windows-specific gui interface is not yet written.  It is
 still necessary to use either the automated, basic, or console
 interfaces to CUnit on Windows at this time.
 
+# New Releases of CUnit - 2018-08 Onwards
+
+This is a fork of CUnit from the SourceForge version. The fork may heal
+eventually but as of today I have not been able to contact the original
+maintainers of CUnit.
+
+_Cunity Cunit_ will maintain a *classic-cunit* branch that from now onwards
+only contains bugfixes and minor changes. This should be suitable as a 
+drop-in for anyone formerly using the sourceforge git repo. This will only
+get small changes by-request from 2018-08-20 onwards.
+
+The _classic-cunit_ branch will remain buildable with Jam as with the
+sourceforge version but will only have light testing.
+
+The _master_ branch will be the latest code to pass the automated Gitlab
+CI build and test.  The _master_ branch will focus on CMake as it's sole 
+build system and will gradually remove the old Jam/Make configurations as
+more of the project gets included in the CMake builds.
+
 
 ## Important Note - Changes to CUnit Structure & Interface
 
@@ -49,7 +68,7 @@ formatted using the version 2 DTD and XSL files.
 Another exception to backward compatibility occurs if the user has
 directly manipulated the global variables in version 1.1.  The
 original CUnit structure included global variables error_number and
-g_pTestRegistry which have been removed from the global namespace as
+`g_pTestRegistry` which have been removed from the global namespace as
 of Version 2.0.  Any user code which directly accessed these variables
 will break.  The variables must be retrieved using the accessor
 functions `CU__get_error()` and `CU_get_registry()`.
@@ -84,9 +103,11 @@ cmake --build .
 The above should result in a `./CUnit/Sources/libcunit.a` file for your platform
 and a self-test program at `./CUnit/Sources/cunit_test`
 
-## Building the CUnit Library and Examples (Old Style)
+### Building the CUnit Library and Examples (Old Style)
 
-### All Platforms:
+_CUnit is moving to CMake, these instructions are historic only and will be removed soon_
+
+#### All Platforms:
 
   As of Version 2.0, a set of Jamfiles is provided for cross-platform
   building of the library, examples, and tests.  The jam build system was
@@ -103,14 +124,14 @@ and a self-test program at `./CUnit/Sources/cunit_test`
   when using gcc, Borland, or VC, but it won't hurt either.
   
   The files generated during the build are placed in a subdirectory
-  given by <CONFIG>/<PLATFORM>, where:
-  
+  given by `<CONFIG>/<PLATFORM>`, where:
+  ```
     <CONFIG> = Debug or Release
     <PLATFORM> = bcc, mingw, msvc, watcom, linux
-    
+  ```
   This allows easy switching between compilers without overlap of the output 
-  files.  The <CONFIG> is determined by whether NODEBUG is defined in your
-  Jamrules file.  <PLATFORM> is set automatically in Jamrules.
+  files.  The `<CONFIG>` is determined by whether NODEBUG is defined in your
+  Jamrules file.  `<PLATFORM>` is set automatically in Jamrules.
 
   To build using jam:
 
@@ -122,19 +143,19 @@ and a self-test program at `./CUnit/Sources/cunit_test`
 
     3. Edit the top section of Jamrules to match your preferences
 
-    4. jam -f Jambase install
+    4. `jam -f Jambase install`
 
-### Linux:
+#### Linux:
 
   In addition to jam, the standard GNU build system is still supported.
   The usual sequence of steps should succeed in building and installing CUnit:
-    1. aclocal  (if necessary)
-    2. autoconf (if necessary)
-    3. automake (if necessary)
-    4. chmod u+x configure (if necessary)
-    5. ./configure --prefix <Your choice of directory for installation>
-    6. make
-    7. make install
+    1. `aclocal`  (if necessary)
+    2. `autoconf` (if necessary)
+    3. `automake` (if necessary)
+    4. `chmod u+x configure` (if necessary)
+    5. `./configure --prefix <Your choice of directory for installation>`
+    6. `make`
+    7. `make install`
 
   What's installed:
     1. libcunit.a (Library file)
@@ -144,7 +165,7 @@ and a self-test program at `./CUnit/Sources/cunit_test`
     5. HTML users guide in the doc subdirectory of the installation path.
     6. Example & test programs in the share subdirectory of the install path.
 
-### Windows:
+#### Windows:
 
   Jam is the preferred build system for Windows.  A set of old VC6 project
   files is included which have been partially updated but not tested.  If
