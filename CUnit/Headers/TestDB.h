@@ -161,6 +161,11 @@ typedef struct CU_Suite
 
   unsigned int      uiNumberOfTestsFailed;  /**< Number of failed tests in the suite. */
   unsigned int      uiNumberOfTestsSuccess; /**< Number of success tests in the suite. */
+
+  CU_BOOL           fSetUpError;     /**< Flag set if the suite setup function failed  a CU_ASSERT */
+  CU_BOOL           fCleanupError;   /**< Flag set if the suite cleanup function failed a CU_ASSERT*/
+  CU_BOOL           fInSetUp;	     /**< Flag set if we are running the suite setup function */
+  CU_BOOL           fInClean;	     /**< Flag set if we are running the suite cleanup function */
 } CU_Suite;
 typedef CU_Suite* CU_pSuite;          /**< Pointer to a CUnit suite. */
 

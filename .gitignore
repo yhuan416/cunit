@@ -6,3 +6,8 @@
 .idea/
 cmake-build-*/
 CUnit-Memory-Dump.xml
+html/
+latex/
+bld/
+packages/
+docs/

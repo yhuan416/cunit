@@ -1,6 +1,10 @@
 variables:
   WINDOWS_CMAKE_IMAGE: cunity/windows-1803-cmake:latest
 
+stages:
+  - build
+  - test
+
 .cunit-build-template: &cunit-build
   script:
     - |
@@ -11,20 +15,67 @@ variables:
       ./CUnit/Sources/cunit_test
       ./Examples/AutomatedTest/t-automated
       junit2html --summary-matrix TestAutomated-Results.xml
+      pushd Examples/CI
+      ./cicd-pass-plain
+      ./cicd-pass-setupfuncs
+      junit2html --summary-matrix *-Results.xml
+      popd
+      cpack -G TGZ CUnit
+  artifacts:
+    paths:
+    - cmake-build/cunit-*.tar.gz
+    - cmake-build/cunit-*.deb
+    - cmake-build/Examples/CI/*-Results.*
+    reports:
+      junit: cmake-build/Examples/CI/*-Results.xml
 
 cunit-ubuntu-18.04:
   <<: *cunit-build
+  stage: build
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
+
+
+cmaketest-ubuntu-18.04:
+  stage: test
+  image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
+  script:
+    - |
+      cd Examples/CMakeTestProject
+      mkdir bld
+      mkdir packages
+      cd bld
+      tar -vxf ../../../cmake-build/cunit-3.0.0.tar.gz -C ../packages
+      cmake .. -DCMAKE_MODULE_PATH=$(pwd)/../packages/cunit-3.0.0/share/cmake/cunit/
+      make
+      ./test-program
+  dependencies:
+    - cunit-ubuntu-18.04
 
 cunit-ubuntu-17.10: 
   <<: *cunit-build
+  stage: build
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-17.10:master
 
 cunit-win1803-vs2015:
+  stage: build
   allow_failure: true
   tags:
     - cunity-windows-docker-1803
   script:
+    - git clean -f -d -x .
     - $cwd = $(pwd).Path
     - docker pull $Env:WINDOWS_CMAKE_IMAGE
     - docker run -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\build-x64.bat
+    - docker run -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\test-x64.bat
+
+pages:
+  script:
+  - apt-get install -y doxygen
+  - doxygen Doxyfile
+  - mv doc/html/ public/
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
+  - feature-cunit-ci

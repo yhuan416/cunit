@@ -3,7 +3,6 @@
 			               
 http://gitlab.com/cunity/cunit - forked from http://cunit.sourceforge.net
 
-
 CUnit is a Unit testing framework for C.
 
 The basic framework is platform/version independent and should be
@@ -41,50 +40,6 @@ CI build and test.  The _master_ branch will focus on CMake as it's sole
 build system and will gradually remove the old Jam/Make configurations as
 more of the project gets included in the CMake builds.
 
-
-## Important Note - Changes to CUnit Structure & Interface
-
-As of version 2.0, the interface functions used to interact with the
-CUnit framework have changed.  The original interface did not attempt
-to protect user code from name clashes with public CUnit functions and
-variables.  To minimize such name clashes, all CUnit public functions
-are now prefixed with `CU_`.
-
-The old public names are deprecated as of Version 2.0, but continue
-to be supported with conversion macros.  In order to compile older code
-using the original interface, it is now necessary to compile with the
-macro `-USE_DEPRECATED_CUNIT_NAMES` defined.  If there are any problems
-compiling older code, please file a bug report.
-
-In addition, the DTD and XSL files for output from the automated test
-interface have been updated to support both old and new file structure.
-That is, a List or Run file generated using the version 1.1 library
-should be (1) valid under the version 2 DTD's and (2) formatted
-correctly by the version 2 XSL's.  Note, however, that this has not
-been extended to the Memory-Dump DTD and XSL files.  That is, memory
-dumps created using version 1.1 are ill-formed and incorrectly
-formatted using the version 2 DTD and XSL files.
-
-Another exception to backward compatibility occurs if the user has
-directly manipulated the global variables in version 1.1.  The
-original CUnit structure included global variables error_number and
-`g_pTestRegistry` which have been removed from the global namespace as
-of Version 2.0.  Any user code which directly accessed these variables
-will break.  The variables must be retrieved using the accessor
-functions `CU__get_error()` and `CU_get_registry()`.
-
-Similarly, user code retrieving the active test registry and directly
-manipulating the uiNumberOfFailures or pResult members will break.
-These members have been moved to the TestRun.c part of the framework
-and are no longer available in the test registry as of version 2.0.
-
-Another change in Version 2.0 is the update of the framework terminology.
-What were termed 'test groups' in the original structure are now called
-"suites", and "test cases" are now just "tests".  This change was made to
-bring CUnit in conformance with standard testing terminology, and results
-in a change in the name of some functions (e.g. `run_group_tests()` is
-now `CU_run_suite()`.
-
 ## Building CUnit
 
 CUnit now builds using CMake (http://www.cmake.org) as such, it should build
@@ -103,75 +58,98 @@ cmake --build .
 The above should result in a `./CUnit/Sources/libcunit.a` file for your platform
 and a self-test program at `./CUnit/Sources/cunit_test`
 
-### Building the CUnit Library and Examples (Old Style)
 
-_CUnit is moving to CMake, these instructions are historic only and will be removed soon_
+# Quick Start
 
-#### All Platforms:
+You want to write a modern CUnit test compatible with common CI/CD workflows?
 
-  As of Version 2.0, a set of Jamfiles is provided for cross-platform
-  building of the library, examples, and tests.  The jam build system was
-  implemented using ftjam 2.3.2 (http://www.freetype.org/jam/index.html).
-  It may work under the original Perforce jam implementation, but has not
-  been tested.  It has been tested under gcc on Linux, and Borland C++ 5.5, 
-  VC7, MinGW 3.2.3, and Open Watcom 1.3 on Windows.  Due to the nature of 
-  jam, the build system should be readily extensible to other platforms.
+Here is the absolute simplest test program you can write.
 
-  The jam file set supports both standard and custom symbolic build
-  targets (install, uninstall, clean, libcunit, examples, test).  A
-  customized Jambase file is provided which sorts out some of the
-  rough edges for MinGW and Watcom on Windows.  It may not be necessary
-  when using gcc, Borland, or VC, but it won't hurt either.
-  
-  The files generated during the build are placed in a subdirectory
-  given by `<CONFIG>/<PLATFORM>`, where:
-  ```
-    <CONFIG> = Debug or Release
-    <PLATFORM> = bcc, mingw, msvc, watcom, linux
-  ```
-  This allows easy switching between compilers without overlap of the output 
-  files.  The `<CONFIG>` is determined by whether NODEBUG is defined in your
-  Jamrules file.  `<PLATFORM>` is set automatically in Jamrules.
 
-  To build using jam:
+```
+#include "CUnitCI.h"
 
-    1. Set the working directory to the top of the source tree
-    
-    2. Generate Jamrules
-       a. On Linux, run autoconf & configure
-       b. On Windows, copy Jamrules.in to Jamrules
+/* Test that one equals one */
+static void test_simple_pass1(void) {
+    CU_ASSERT_FATAL(1 == 1);
+}
 
-    3. Edit the top section of Jamrules to match your preferences
+CUNIT_CI_RUN("my-suite",
+             CUNIT_CI_TEST(test_simple_pass1));
+```
 
-    4. `jam -f Jambase install`
+When executed, the above program will write a JUnit XML report and
+print output similar to:
 
-#### Linux:
+```
+Starting CUnit test:
+ /home/inb/git/cunit/cmake-build/Examples/CI/cicd-pass-plain
+JUnit XML:
+ /home/inb/git/cunit/cmake-build/Examples/CI/cicd-pass-plain-Results.xml
 
-  In addition to jam, the standard GNU build system is still supported.
-  The usual sequence of steps should succeed in building and installing CUnit:
-    1. `aclocal`  (if necessary)
-    2. `autoconf` (if necessary)
-    3. `automake` (if necessary)
-    4. `chmod u+x configure` (if necessary)
-    5. `./configure --prefix <Your choice of directory for installation>`
-    6. `make`
-    7. `make install`
+Running Suite : cicd-pass-plain
+     Running Test : test_simple_pass1 ..PASSED
 
-  What's installed:
-    1. libcunit.a (Library file)
-    2. CUnit Header files
-    3. DTD and XSL files supporting xml output files in share directory
-    4. Man Pages in relevant man directories under the installation path.
-    5. HTML users guide in the doc subdirectory of the installation path.
-    6. Example & test programs in the share subdirectory of the install path.
+Run Summary:    Type  Total    Ran Passed Failed Inactive
+              suites      1      1    n/a      0        0
+               tests      1      1      1      0        0
+             asserts      1      1      1      0      n/a
 
-#### Windows:
+Elapsed time =    0.000 seconds
+```
 
-  Jam is the preferred build system for Windows.  A set of old VC6 project
-  files is included which have been partially updated but not tested.  If
-  they don't work and you get them working, we'd be happy to include them
-  in the CUnit distribution.  A set of Visual Studio 2003/VC7 solution and
-  project files has also been provided in the VC7 subdirectory.  Similarly,
-  a set of Visual Studio 2005/VC8 solution and project files is located in
-  the VC8 subdirectory.  The latter should work with all versions of VC 2005,
-  including the Express edition.
+A CUnit program written in this way will exit with a status value of zero if all the test have passed. This means you can easily include it in part of a CI script to fail a build early.
+
+## Setups and Teardowns
+
+If you want to make use of setup and teardown functions (per suite or per test setup/cleanup) you can use the
+SETUP and TEARDOWN macros:-
+
+```
+#include "CUnitCI.h"
+
+char *buf = NULL;
+size_t bufsize = 32;
+
+/* run at the start of the suite */
+CU_SUITE_SETUP() {
+    buf = (char*) malloc(bufsize);
+    CU_ASSERT_FATAL(buf != NULL);
+    return CUE_SUCCESS;
+}
+
+/* run at the end of the suite */
+CU_SUITE_TEARDOWN() {
+    if (buf) free(buf);
+    return CUE_SUCCESS;
+}
+
+/* run at the start of each test */
+CU_TEST_SETUP() {
+    memset(buf, 1, bufsize);
+}
+
+/* run at the end of each test */
+CU_TEST_TEARDOWN() {
+    memset(buf, 0, bufsize);
+}
+
+/* Test that one equals one */
+static void test_simple_pass1(void) {
+    CU_ASSERT_FATAL(1 == 1);
+}
+
+/* Test that two is bigger than one */
+static void test_simple_pass2(void) {
+    CU_ASSERT_FATAL(2 > 1);
+}
+
+CUNIT_CI_RUN("my-suite",
+             CUNIT_CI_TEST(test_simple_pass1),
+             CUNIT_CI_TEST(test_simple_pass2),
+             );
+```
+
+# Online Documentation
+
+You should be able to reach the latest doxygen documentation at http://cunity.gitlab.io/cunit 

@@ -156,9 +156,6 @@ void CU_automated_run_tests(void)
 
     automated_run_all_tests(NULL);
 
-    if (CUE_SUCCESS != uninitialize_result_file()) {
-      fprintf(stderr, "\n%s", _("ERROR - Failed to close/uninitialize the result files."));
-    }
   }
 }
 
@@ -254,9 +251,11 @@ static CU_ErrorCode initialize_result_file(const char* szFilename)
     if (bJUnitXmlOutput == CU_TRUE) {
       fprintf(f_pTestResultFile,
               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-              "<testsuites errors=\"0\" failures=\"%d\" tests=\"%d\" name=\"\"> \n",
+              "<testsuites errors=\"0\" failures=\"%d\" tests=\"%d\" name=\"%s\"> \n",
               pRunSummary->nTestsFailed,
-              pRunSummary->nTestsRun);
+              pRunSummary->nTestsRun,
+              szFilename
+      );
     } else {
       fprintf(f_pTestResultFile,
               "<?xml version=\"1.0\" ?> \n"
@@ -268,6 +267,16 @@ static CU_ErrorCode initialize_result_file(const char* szFilename)
   }
 
   return CU_get_error();
+}
+
+
+CU_EXPORT CU_ErrorCode CU_initialize_junit_result_file(void)
+{
+    return initialize_result_file(f_szTestResultFileName);
+}
+
+CU_EXPORT const char* CU_automated_get_junit_filename(void) {
+    return f_szTestResultFileName;
 }
 
 /*------------------------------------------------------------------------*/
@@ -564,6 +573,10 @@ static void automated_all_tests_complete_message_handler(const CU_pFailureRecord
             pRunSummary->nAsserts - pRunSummary->nAssertsFailed,
             pRunSummary->nAssertsFailed,
             _("n/a"));
+    }
+
+    if (CUE_SUCCESS != uninitialize_result_file()) {
+        fprintf(stderr, "\n%s", _("ERROR - Failed to close/uninitialize the result files."));
     }
 }
 

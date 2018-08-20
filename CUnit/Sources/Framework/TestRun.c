@@ -141,7 +141,6 @@ CU_BOOL CU_assertImplementation(CU_BOOL bValue,
 
   /* these should always be non-NULL (i.e. a test run is in progress) */
   assert(NULL != f_pCurSuite);
-  assert(NULL != f_pCurTest);
 
   ++f_run_summary.nAsserts;
   if (CU_FALSE == bValue) {
@@ -149,8 +148,14 @@ CU_BOOL CU_assertImplementation(CU_BOOL bValue,
     add_failure(&f_failure_list, &f_run_summary, CUF_AssertFailed,
                 uiLine, strCondition, strFile, f_pCurSuite, f_pCurTest);
 
-    if ((CU_TRUE == bFatal) && (NULL != f_pCurTest->pJumpBuf)) {
-      longjmp(*(f_pCurTest->pJumpBuf), 1);
+    if(f_pCurTest) {
+      if ((CU_TRUE == bFatal) && (NULL != f_pCurTest->pJumpBuf)) {
+        longjmp(*(f_pCurTest->pJumpBuf), 1);
+      }
+    } else {
+      /* this was a setup or teardown assert */
+      if (f_pCurSuite->fInSetUp) f_pCurSuite->fSetUpError = CU_TRUE;
+      if (f_pCurSuite->fInClean) f_pCurSuite->fCleanupError = CU_TRUE;
     }
   }
 
@@ -805,20 +810,28 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
 
   /* run suite if it's active */
   if (CU_FALSE != pSuite->fActive) {
-
     /* run the suite initialization function, if any */
-    if ((NULL != pSuite->pInitializeFunc) && (0 != (*pSuite->pInitializeFunc)())) {
-      /* init function had an error - call handler, if any */
-      CCU_MessageHandler_Run(CUMSG_SUITE_SETUP_FAILED, pSuite, NULL, NULL);
-      pRunSummary->nSuitesFailed++;
-      add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
-                  _("Suite Initialization failed - Suite Skipped"),
-                  _("CUnit System"), pSuite, NULL);
-      result = CUE_SINIT_FAILED;
+    if (NULL != pSuite->pInitializeFunc) {
+      pSuite->fInSetUp = CU_TRUE;
+      if ((CUE_SUCCESS != (*pSuite->pInitializeFunc)()) || pSuite->fSetUpError) {
+        /* init function returned a failure */
+        result = CUE_SINIT_FAILED;
+      }
+      pSuite->fInSetUp = CU_FALSE;
+
+      if (result != CUE_SUCCESS) {
+        /* init function had an error - call handler, if any */
+        CCU_MessageHandler_Run(CUMSG_SUITE_SETUP_FAILED, pSuite, NULL, NULL);
+        pRunSummary->nSuitesFailed++;
+        add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
+                    _("Suite Initialization failed - Suite Skipped"),
+                    _("CUnit System"), pSuite, NULL);
+        result = CUE_SINIT_FAILED;
+      }
     }
 
     /* reach here if no suite initialization, or if it succeeded */
-    else {
+    if (result == CUE_SUCCESS) {
       pTest = pSuite->pTest;
       while ((NULL != pTest) && ((CUE_SUCCESS == result) || (CU_get_error_action() == CUEA_IGNORE))) {
         if (CU_FALSE != pTest->fActive) {
@@ -846,12 +859,19 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
       pRunSummary->nSuitesRun++;
 
       /* call the suite cleanup function, if any */
-      if ((NULL != pSuite->pCleanupFunc) && (0 != (*pSuite->pCleanupFunc)())) {
-        CCU_MessageHandler_Run(CUMSG_SUITE_TEARDOWN_FAILED, pSuite, NULL, NULL);
-        pRunSummary->nSuitesFailed++;
-        add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
-                    0, _("Suite cleanup failed."), _("CUnit System"), pSuite, NULL);
-        result = (CUE_SUCCESS == result) ? CUE_SCLEAN_FAILED : result;
+      if (NULL != pSuite->pCleanupFunc) {
+        pSuite->fInClean = CU_TRUE;
+        if ((CUE_SUCCESS != (*pSuite->pCleanupFunc)()) || pSuite->fCleanupError) {
+          result = CUE_SCLEAN_FAILED;
+        }
+        pSuite->fInClean = CU_FALSE;
+
+        if (result != CUE_SUCCESS) {
+          CCU_MessageHandler_Run(CUMSG_SUITE_TEARDOWN_FAILED, pSuite, NULL, NULL);
+          pRunSummary->nSuitesFailed++;
+          add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
+                      0, _("Suite cleanup failed."), _("CUnit System"), pSuite, NULL);
+        }
       }
     }
   }

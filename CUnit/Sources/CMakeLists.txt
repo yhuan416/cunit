@@ -8,12 +8,15 @@ FILE(GLOB Framework Framework/*.c)
 FILE(GLOB Console Console/*.c)
 FILE(GLOB Curses Curses/*.c)
 FILE(GLOB Test Test/*.c)
+FILE(GLOB CI CI/*.c)
 
 set(cunit_srcs
         ${Basic}
         ${Automated}
+        ${CI}
         ${Framework}
-        ${Console})
+        ${Console}
+        )
 
 set(cunit_libs "")
 
@@ -26,15 +29,21 @@ else()
 endif(CURSES_FOUND)
 
 
-add_library(cunit-static STATIC
+add_library(cunit STATIC
         ${cunit_srcs})
-target_link_libraries(cunit-static cunit_headers ${cunit_libs})
-set_target_properties(cunit-static PROPERTIES OUTPUT_NAME cunit)
+target_link_libraries(cunit PUBLIC cunit_headers)
+target_link_libraries(cunit PUBLIC ${cunit_libs})
 
-add_library(cunit SHARED
-        ${cunit_srcs})
-target_link_libraries(cunit cunit_headers ${cunit_libs})
 
+
+install(TARGETS cunit
+        EXPORT FindCUnit
+        LIBRARY DESTINATION lib/cunit
+        ARCHIVE DESTINATION lib/cunit
+        )
+install(EXPORT FindCUnit
+        DESTINATION share/cmake/cunit)
+export(TARGETS cunit FILE ${CMAKE_BINARY_DIR}/cmake/FindCUnit.cmake)
 
 # for internal test program
 add_executable(cunit_test

@@ -13,7 +13,7 @@ add_executable(t-ex-basictest
         )
 
 target_link_libraries(t-ex-basictest
-        cunit-static
+        cunit
         )
 
 target_include_directories(t-ex-basictest

@@ -146,11 +146,25 @@ CU_pTestRegistry CU_set_registry(CU_pTestRegistry pRegistry)
   return pOldRegistry;
 }
 
+/* test that assert has not been compiled out */
+static void _test_assert_enabled(void) {
+	int i = 0;
+	assert(++i);
+	if (i == 0) {
+		fprintf(stderr, "CUnit built wrongly:\n");
+		fprintf(stderr, "This build of CUnit has been built without a working assert() macro\n");
+		fprintf(stderr, "If this is windows, try building with /UNDEBUG\n");
+		exit(1);
+	}
+}
+
 /*------------------------------------------------------------------------*/
 CU_pSuite CU_add_suite_with_setup_and_teardown(const char* strName, CU_InitializeFunc pInit, CU_CleanupFunc pClean, CU_SetUpFunc pSetup, CU_TearDownFunc pTear)
 {
   CU_pSuite pRetValue = NULL;
   CU_ErrorCode error = CUE_SUCCESS;
+
+  _test_assert_enabled();
 
   assert(CU_FALSE == CU_is_test_running());
 
