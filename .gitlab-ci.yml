@@ -1,11 +1,7 @@
 
-build_ubuntu_cmake:
-  image: ubuntu:17.10
+.cunit-build-template: &cunit-build
   script:
     - |
-      apt-get update
-      apt-get -y install cmake build-essential gcc libncurses5-dev python-pip
-      pip install junit2html
       mkdir cmake-build
       cd cmake-build
       cmake ..
@@ -13,3 +9,11 @@ build_ubuntu_cmake:
       ./CUnit/Sources/cunit_test
       ./Examples/AutomatedTest/t-automated
       junit2html --summary-matrix TestAutomated-Results.xml
+
+cunit-ubuntu-18.04:
+  <<: *cunit-build
+  image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
+
+cunit-ubuntu-17.10: 
+  <<: *cunit-build
+  image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-17.10:master
