@@ -1,4 +1,7 @@
 
+variables:
+  WINDOWS_CMAKE_IMAGE: cunity/windows-1803-cmake:latest
+
 .cunit-build-template: &cunit-build
   script:
     - |
@@ -17,3 +20,11 @@ cunit-ubuntu-18.04:
 cunit-ubuntu-17.10: 
   <<: *cunit-build
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-17.10:master
+
+cunit-win1803-vs2015:
+  tags:
+    - cunity-windows-docker-1803
+  script:
+    - $cwd = $(pwd).Path
+    - docker pull $Env:WINDOWS_CMAKE_IMAGE
+    - docker run -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\build-x64.bat
