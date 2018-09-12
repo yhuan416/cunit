@@ -1,4 +1,3 @@
-
 variables:
   WINDOWS_CMAKE_IMAGE: cunity/windows-1803-cmake:latest
 
@@ -22,6 +21,7 @@ cunit-ubuntu-17.10:
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-17.10:master
 
 cunit-win1803-vs2015:
+  allow_failure: true
   tags:
     - cunity-windows-docker-1803
   script:
