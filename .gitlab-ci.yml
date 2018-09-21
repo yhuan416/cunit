@@ -4,6 +4,7 @@ variables:
 stages:
   - build
   - test
+  - release
 
 .cunit-build-template: &cunit-build
   script:
@@ -69,6 +70,8 @@ cunit-win1803-vs2015:
     - docker run -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\test-x64.bat
 
 pages:
+  image: ubuntu:18.04
+  stage: release
   script:
   - apt-get install -y doxygen
   - doxygen Doxyfile
