@@ -70,10 +70,9 @@ cunit-win1803-vs2015:
     - docker run -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\test-x64.bat
 
 pages:
-  image: ubuntu:18.04
+  image: registry.gitlab.com/cunity/doxygen-image/ubuntu-18.04-doxygen:master
   stage: release
   script:
-  - apt-get install -y doxygen
   - doxygen Doxyfile
   - mv doc/html/ public/
   artifacts:
