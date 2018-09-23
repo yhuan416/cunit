@@ -21,12 +21,14 @@ set(cunit_srcs
 set(cunit_libs "")
 
 
-if(CURSES_FOUND)
-    list(APPEND cunit_srcs ${Curses})
-    list(APPEND cunit_libs ${CURSES_LIBRARY})
-else()
-    message(WARNING "curses not found - curses support disabled")
-endif(CURSES_FOUND)
+if(NOT APPLE AND NOT WIN32)
+    if(CURSES_FOUND)
+        list(APPEND cunit_srcs ${Curses})
+        list(APPEND cunit_libs ${CURSES_LIBRARY})
+    else()
+        message(WARNING "curses not found - curses support disabled")
+    endif(CURSES_FOUND)
+endif()
 
 
 add_library(cunit STATIC
