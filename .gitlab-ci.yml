@@ -66,8 +66,8 @@ cunit-win1803-vs2015:
     - git clean -f -d -x .
     - $cwd = $(pwd).Path
     - docker pull $Env:WINDOWS_CMAKE_IMAGE
-    - docker run -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\build-x64.bat
-    - docker run -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\test-x64.bat
+    - docker run --rm -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\build-x64.bat
+    - docker run --rm -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\test-x64.bat
 
 pages:
   image: registry.gitlab.com/cunity/doxygen-image/ubuntu-18.04-doxygen:master
