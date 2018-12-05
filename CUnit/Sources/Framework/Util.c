@@ -49,9 +49,9 @@
 #include <assert.h>
 #include <string.h>
 
-#include "CUnit.h"
-#include "TestDB.h"
-#include "Util.h"
+#include "CUnit/CUnit.h"
+#include "CUnit/TestDB.h"
+#include "CUnit/Util.h"
 
 
 /*------------------------------------------------------------------------*/

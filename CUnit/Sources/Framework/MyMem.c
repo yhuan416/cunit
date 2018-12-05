@@ -52,9 +52,9 @@
 #include <string.h>
 #include <time.h>
 
-#include "CUnit.h"
-#include "MyMem.h"
-#include "CUnit_intl.h"
+#include "CUnit/CUnit.h"
+#include "CUnit/MyMem.h"
+#include "CUnit/CUnit_intl.h"
 
 #ifdef MEMTRACE
 

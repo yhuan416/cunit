@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Console.h"
+#include "CUnit/Console.h"
 #include "ExampleTests.h"
 
 int main(int argc, char* argv[])

@@ -15,7 +15,7 @@
  *  version 2 of the License, or (at your option) any later version.
  */
 
-#include "CUnitCI.h"
+#include "CUnit/CUnitCI.h"
 
 static int suite_setup_count = 0;
 static int suite_teardown_count = 0;

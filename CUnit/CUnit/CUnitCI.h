@@ -34,7 +34,7 @@
 #ifndef CCU_CUNITCI_H
 #define CCU_CUNITCI_H
 
-#include "CUnit.h"
+#include "CUnit/CUnit.h"
 
 #ifdef __cplusplus
 extern "C" {

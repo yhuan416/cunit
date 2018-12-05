@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Automated.h"
+#include "CUnit/Automated.h"
 #include "ExampleTests.h"
 
 int main(int argc, char* argv[])

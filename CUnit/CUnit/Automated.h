@@ -38,9 +38,9 @@
 #ifndef CUNIT_AUTOMATED_H_SEEN
 #define CUNIT_AUTOMATED_H_SEEN
 
-#include "CUnit.h"
-#include "TestDB.h"
-#include "AutomatedJUnitXml.h"
+#include "CUnit/CUnit.h"
+#include "CUnit/TestDB.h"
+#include "CUnit/AutomatedJUnitXml.h"
 
 #ifdef __cplusplus
 extern "C" {

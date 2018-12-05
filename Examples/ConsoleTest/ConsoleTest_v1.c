@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Console.h"
+#include "CUnit/Console.h"
 
 int success_init(void) { return 0; }
 int success_clean(void) { return 0; }

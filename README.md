@@ -58,6 +58,24 @@ cmake --build .
 The above should result in a `./CUnit/Sources/libcunit.a` file for your platform
 and a self-test program at `./CUnit/Sources/cunit_test`
 
+### Using CUnit as a submodule
+
+It is not always possible to build and install a package into the system you are using.
+If using CMake, you can include cunit as a submodule and compile it using
+an `add_subdirectory()` call.
+
+```
+git submodule add ... cunit
+```
+Then use.
+```
+add_subdirectory(cunit/CUnit)
+
+...
+
+target_link_libraries(mytest PRIVATE cunit)
+```
+
 
 # Quick Start
 
@@ -67,7 +85,7 @@ Here is the absolute simplest test program you can write.
 
 
 ```
-#include "CUnitCI.h"
+#include "CUnit/CUnitCI.h"
 
 /* Test that one equals one */
 static void test_simple_pass1(void) {
@@ -106,7 +124,7 @@ If you want to make use of setup and teardown functions (per suite or per test s
 SETUP and TEARDOWN macros:-
 
 ```
-#include "CUnitCI.h"
+#include "CUnit/CUnitCI.h"
 
 char *buf = NULL;
 size_t bufsize = 32;

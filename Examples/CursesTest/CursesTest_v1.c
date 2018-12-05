@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "CUCurses.h"
+#include "CUnit/CUCurses.h"
 
 int success_init(void) { return 0; }
 int success_clean(void) { return 0; }

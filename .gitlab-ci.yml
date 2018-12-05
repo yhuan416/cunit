@@ -1,6 +1,7 @@
 variables:
   WINDOWS_CMAKE_IMAGE: cunity/windows-1803-cmake:latest
 
+
 stages:
   - build
   - test
@@ -8,20 +9,20 @@ stages:
 
 .cunit-build-template: &cunit-build
   script:
-    - |
-      mkdir cmake-build
-      cd cmake-build
-      cmake ..
-      cmake --build . -- -j4
-      ./CUnit/Sources/cunit_test
-      ./Examples/AutomatedTest/t-automated
-      junit2html --summary-matrix TestAutomated-Results.xml
-      pushd Examples/CI
-      ./cicd-pass-plain
-      ./cicd-pass-setupfuncs
-      junit2html --summary-matrix *-Results.xml
-      popd
-      cpack -G TGZ CUnit
+    - git clean -f -d -x
+    - mkdir cmake-build
+    - cd cmake-build
+    - cmake ..
+    - cmake --build . -- -j4
+    - ./CUnit/cunit_test
+    - ./Examples/AutomatedTest/t-automated
+    - junit2html --summary-matrix TestAutomated-Results.xml
+    - pushd Examples/CI
+    - ./cicd-pass-plain
+    - ./cicd-pass-setupfuncs
+    - junit2html --summary-matrix *-Results.xml
+    - popd
+    - cpack -G TGZ CUnit
   artifacts:
     paths:
     - cmake-build/cunit-*.tar.gz
@@ -36,19 +37,34 @@ cunit-ubuntu-18.04:
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
 
 
-cmaketest-ubuntu-18.04:
+cmake-direxample-ubuntu-18.04:
   stage: test
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
   script:
-    - |
-      cd Examples/CMakeTestProject
-      mkdir bld
-      mkdir packages
-      cd bld
-      tar -vxf ../../../cmake-build/cunit-3.0.0.tar.gz -C ../packages
-      cmake .. -DCMAKE_MODULE_PATH=$(pwd)/../packages/cunit-3.0.0/share/cmake/cunit/
-      make
-      ./test-program
+  - cd CMakeExamples/CMakeSubmodule
+  - ln -s ../../. cunit-x.y.z
+  - mkdir bld
+  - cd bld
+  - cmake ..
+  - cmake --build .
+  - ./test-program
+  dependencies:
+  - cunit-ubuntu-18.04
+
+
+cmake-pkgexample-ubuntu-18.04:
+  stage: test
+  image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
+  script:
+    - find . -type f -name "*.tar.gz"
+    - mkdir -p packages/cunit
+    - tar -vxf cmake-build/cunit-3.0.2.tar.gz --strip-components=1 -C packages/cunit
+    - cd CMakeExamples/CMakeFindPackage
+    - mkdir bld
+    - cd bld
+    - cmake .. -DCUnit_DIR=$(pwd)/../../../packages/cunit/CUnit/share/cmake
+    - cmake --build .
+    - ./test-program
   dependencies:
     - cunit-ubuntu-18.04
 

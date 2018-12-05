@@ -6,8 +6,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "InternalPoolMalloc.h"
-#include "MessageHandlers.h"
+#include "CUnit/InternalPoolMalloc.h"
+#include "CUnit/MessageHandlers.h"
 
 
 

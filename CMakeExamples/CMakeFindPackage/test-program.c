@@ -23,7 +23,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "CUnitCI.h"
+#include "CUnit/CUnitCI.h"
 
 static void test_simple_pass1(void) {
     CU_ASSERT_FATAL(1 == 1);

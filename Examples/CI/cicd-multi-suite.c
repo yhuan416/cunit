@@ -12,7 +12,7 @@
  *  version 2 of the License, or (at your option) any later version.
  */
 
-#include "CUnitCI.h"
+#include "CUnit/CUnitCI.h"
 
 static void test_one(void) {
     CU_ASSERT_FATAL(1);

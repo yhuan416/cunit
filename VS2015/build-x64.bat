@@ -5,4 +5,4 @@ cmake --build . --config Release || exit \b
 
 cd CUnit
 
-Sources\Release\cunit_test.exe || exit \b
+Release\cunit_test.exe || exit \b

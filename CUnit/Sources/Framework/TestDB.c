@@ -62,12 +62,12 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "CUnit.h"
-#include "MyMem.h"
-#include "TestDB.h"
-#include "TestRun.h"
-#include "Util.h"
-#include "CUnit_intl.h"
+#include "CUnit/CUnit.h"
+#include "CUnit/MyMem.h"
+#include "CUnit/TestDB.h"
+#include "CUnit/TestRun.h"
+#include "CUnit/Util.h"
+#include "CUnit/CUnit_intl.h"
 
 /*=================================================================
  *  Global/Static Definitions

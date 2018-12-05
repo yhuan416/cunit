@@ -38,10 +38,10 @@
 #include <string.h>
 #include <time.h>
 
-#include "CUnit.h"
-#include "MyMem.h"
-#include "Util.h"
-#include "CUnit_intl.h"
+#include "CUnit/CUnit.h"
+#include "CUnit/MyMem.h"
+#include "CUnit/Util.h"
+#include "CUnit/CUnit_intl.h"
 #include "test_cunit.h"
 
 static unsigned int f_nTests = 0;

@@ -1,7 +1,7 @@
 /*
  * Allocate small amounts of memory from a static pool, This memory can be leaked without issue.
  */
-#include "InternalPoolMalloc.h"
+#include "CUnit/InternalPoolMalloc.h"
 #include <errno.h>
 #include <assert.h>
 

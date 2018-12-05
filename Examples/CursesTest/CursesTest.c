@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "CUCurses.h"
+#include "CUnit/CUCurses.h"
 #include "ExampleTests.h"
 
 int main(int argc, char* argv[])

@@ -26,12 +26,12 @@
 
 #include "assert.h"
 
-#include "Automated.h"
-#include "AutomatedJUnitXml.h"
-#include "Basic.h"
-#include "MessageHandlers.h"
+#include "CUnit/Automated.h"
+#include "CUnit/AutomatedJUnitXml.h"
+#include "CUnit/Basic.h"
+#include "CUnit/MessageHandlers.h"
 
-#include "CUnit_intl.h"
+#include "CUnit/CUnit_intl.h"
 
 #if defined(_WIN32) || defined(WIN32)
 #include <direct.h>

@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Basic.h"
+#include "CUnit/Basic.h"
 #include "ExampleTests.h"
 
 int main(int argc, char* argv[])

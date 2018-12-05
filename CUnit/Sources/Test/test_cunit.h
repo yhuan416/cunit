@@ -42,7 +42,7 @@
 #ifndef CUNIT_TEST_CUNIT_H_SEEN
 #define CUNIT_TEST_CUNIT_H_SEEN
 
-#include "CUnit.h"
+#include "CUnit/CUnit.h"
 
 #ifdef CUNIT_BUILD_TESTS
 
