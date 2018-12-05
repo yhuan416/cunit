@@ -2283,7 +2283,7 @@ static void test_CU_run_suite(void)
   TEST(CUE_SCLEAN_FAILED == CU_run_suite(pSuite3));   /* all tests inactive */
   test_results(1,1,0,0,0,2,0,0,0,1);
   CU_set_fail_on_inactive(CU_TRUE);
-  TEST(CUE_TEST_INACTIVE == CU_run_suite(pSuite3));
+  TEST(CUE_SCLEAN_FAILED == CU_run_suite(pSuite3));
   test_results(1,1,0,0,0,1,0,0,0,2);
 
   CU_set_test_active(pTest8, CU_TRUE);
@@ -2292,7 +2292,7 @@ static void test_CU_run_suite(void)
   TEST(CUE_SCLEAN_FAILED == CU_run_suite(pSuite3));   /* some tests inactive */
   test_results(1,1,0,1,1,1,1,0,1,2);
   CU_set_fail_on_inactive(CU_TRUE);
-  TEST(CUE_TEST_INACTIVE == CU_run_suite(pSuite3));
+  TEST(CUE_SCLEAN_FAILED == CU_run_suite(pSuite3));
   test_results(1,1,0,1,1,1,1,0,1,3);
   CU_set_test_active(pTest9, CU_TRUE);
 
@@ -2359,7 +2359,7 @@ static void test_CU_run_suite(void)
   test_results(1,1,0,0,0,2,0,0,0,1);
   f_exit_called = CU_FALSE;
   CU_set_fail_on_inactive(CU_TRUE);
-  TEST(CUE_TEST_INACTIVE == CU_run_suite(pSuite3));
+  TEST(CUE_SCLEAN_FAILED == CU_run_suite(pSuite3));
   TEST(CU_TRUE == f_exit_called);
   test_results(1,1,0,0,0,1,0,0,0,2);
 
@@ -2372,7 +2372,7 @@ static void test_CU_run_suite(void)
   test_results(1,1,0,1,0,1,1,1,0,1);
   f_exit_called = CU_FALSE;
   CU_set_fail_on_inactive(CU_TRUE);
-  TEST(CUE_TEST_INACTIVE == CU_run_suite(pSuite3));
+  TEST(CUE_SCLEAN_FAILED == CU_run_suite(pSuite3));
   TEST(CU_TRUE == f_exit_called);
   test_results(1,1,0,0,0,1,0,0,0,2);
   CU_set_test_active(pTest8, CU_TRUE);
