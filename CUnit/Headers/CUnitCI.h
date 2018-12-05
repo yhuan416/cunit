@@ -142,12 +142,12 @@ static CU_TearDownFunc   __cu_test_teardown;
  */
 #define CUNIT_CI_RUN(_suitename, ...)   \
 int main(int argc, char** argv) {       \
-    CU_CI_add_suite(_suitename,         \
-        __cu_suite_setup,               \
-        __cu_suite_teardown,            \
-        __cu_test_setup,                \
-        __cu_test_teardown);            \
-    __VA_ARGS__                     ;   \
+            CU_CI_add_suite(_suitename, \
+            __cu_suite_setup,           \
+            __cu_suite_teardown,        \
+            __cu_test_setup,            \
+            __cu_test_teardown);        \
+    __VA_ARGS__                  ;      \
     return CU_CI_main(argc, argv); }
 
 

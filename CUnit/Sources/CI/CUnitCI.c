@@ -30,7 +30,7 @@
 #include "AutomatedJUnitXml.h"
 #include "Basic.h"
 #include "MessageHandlers.h"
-#include "CUnitCI.h"
+
 #include "CUnit_intl.h"
 
 #if defined(_WIN32) || defined(WIN32)

@@ -87,7 +87,7 @@ CU_EXPORT void CU_set_output_filename(const char* szFilenameRoot);
 
 void CU_automated_package_name_set(const char *pName);
 
-const char *CU_automated_package_name_get();
+const char *CU_automated_package_name_get(void);
 
 /**
  * Append the automated (xml) test event handlers
