@@ -129,6 +129,11 @@ CU_EXPORT size_t CU_number_width(int number);
  *  number in decimal.
  */
 
+CU_EXPORT const char* CU_get_basename(const char* path);
+/**<
+ *  Given a file path, return a pointer to the last component (the basename)
+ */
+
 #ifdef CUNIT_BUILD_TESTS
 void test_cunit_Util(void);
 #endif

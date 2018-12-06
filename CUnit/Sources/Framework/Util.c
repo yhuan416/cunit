@@ -252,6 +252,28 @@ size_t CU_number_width(int number)
 	return (strlen(buf));
 }
 
+const char* CU_get_basename(const char* path)
+{
+  size_t path_len;
+  int i;
+  assert(path && "expected a nul terminated path string");
+  path_len = strlen(path);
+  /* start at the end and find the first path character (/ or \) */  
+  for (i = path_len - 1; i >= 0; i--) {
+    switch(path[i]) {
+      case '/':
+        return path + i + 1;
+      case '\\':
+        return path + i + 1;
+      default:
+        break;
+    }
+  }
+
+  /* there were not path components at all, probably this was on PATH */
+  return path;
+}
+
 /** @} */
 
 #ifdef CUNIT_BUILD_TESTS

@@ -30,6 +30,7 @@
 #include "CUnit/AutomatedJUnitXml.h"
 #include "CUnit/Basic.h"
 #include "CUnit/MessageHandlers.h"
+#include "CUnit/Util.h"
 
 #include "CUnit/CUnit_intl.h"
 
@@ -109,7 +110,7 @@ CU_EXPORT int CU_CI_main(int argc, char** argv) {
 
     if (argc > 0) {
         fprintf(stdout, _("Starting CUnit test:\n %s\n"), argv[0]);
-        CU_set_output_filename(argv[0]);
+        CU_set_output_filename(CU_get_basename(argv[0]));
         CU_automated_enable_junit_xml(CU_TRUE);
         // if we can work out how to make report files then enable them
         if (CUE_SUCCESS != CU_initialize_junit_result_file()) {
