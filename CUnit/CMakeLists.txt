@@ -1,4 +1,5 @@
 project(CUnit C)
+cmake_minimum_required (VERSION 3.2)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Werror=strict-prototypes")
@@ -56,6 +57,20 @@ if(NOT APPLE AND NOT WIN32)
     else()
         message(WARNING "curses not found - curses support disabled")
     endif(CURSES_FOUND)
+endif()
+
+include(CheckFunctionExists)
+
+CHECK_FUNCTION_EXISTS(fabs RESULT)
+if(NOT RESULT)
+  unset(RESULT)
+  list(APPEND CMAKE_REQUIRED_LIBRARIES m)
+  CHECK_FUNCTION_EXISTS(fabs RESULT2)
+  if(RESULT2)
+    list(APPEND cunit_libs m)
+  else()
+    message(FATAL_ERROR "No fabs() found")
+  endif()
 endif()
 
 
