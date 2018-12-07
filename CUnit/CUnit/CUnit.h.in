@@ -108,9 +108,9 @@
 #  define CU_EXPORT
 #endif  /* WIN32 */
 
-#include "CUError.h"
-#include "TestDB.h"   /* not needed here - included for user convenience */
-#include "TestRun.h"  /* not needed here - include (after BOOL define) for user convenience */
+#include "CUnit/CUError.h"
+#include "CUnit/TestDB.h"   /* not needed here - included for user convenience */
+#include "CUnit/TestRun.h"  /* not needed here - include (after BOOL define) for user convenience */
 
 /** Record a pass condition without performing a logical test. */
 #define CU_PASS(msg) \

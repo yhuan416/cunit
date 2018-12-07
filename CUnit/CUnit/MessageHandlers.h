@@ -6,7 +6,7 @@
 #ifndef CU_MESSAGEHANDLERS_H
 #define CU_MESSAGEHANDLERS_H
 
-#include "TestRun.h"
+#include "CUnit/TestRun.h"
 
 /**
  * Types of MessageHandlers.

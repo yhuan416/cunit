@@ -5,7 +5,7 @@
 #ifndef CU_AUTOMATEDJUNITXML_H
 #define CU_AUTOMATEDJUNITXML_H
 
-#include "CUnit.h"
+#include "CUnit/CUnit.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

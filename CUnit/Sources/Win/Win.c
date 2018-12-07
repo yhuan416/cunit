@@ -33,7 +33,7 @@
 #include "Win.h"
 #include "resource.h"
 
-#include "CUnit.h"
+#include "CUnit/CUnit.h"
 
 static LRESULT CALLBACK DialogMessageHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
