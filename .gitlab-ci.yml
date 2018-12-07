@@ -58,7 +58,7 @@ cmake-pkgexample-ubuntu-18.04:
   script:
     - find . -type f -name "*.tar.gz"
     - mkdir -p packages/cunit
-    - tar -vxf cmake-build/cunit-3.0.3.tar.gz --strip-components=1 -C packages/cunit
+    - tar -vxf cmake-build/cunit-3.0.4.tar.gz --strip-components=1 -C packages/cunit
     - cd CMakeExamples/CMakeFindPackage
     - mkdir bld
     - cd bld
