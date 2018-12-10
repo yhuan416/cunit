@@ -331,24 +331,29 @@ static void basic_suite_cleanup_failure_message_handler(const CU_pSuite pSuite)
 
 void CCU_basic_add_handlers(void)
 {
-  CCU_MessageHandler handler = {0};
+  CCU_MessageHandler handler;
 
+  memset(&handler, 0, sizeof(handler));
   handler.type = CUMSG_TEST_STARTED;
   handler.func.test_started = basic_test_start_message_handler;
   CCU_MessageHandler_Add(handler.type, &handler);
 
+  memset(&handler, 0, sizeof(handler));
   handler.type = CUMSG_TEST_COMPLETED;
   handler.func.test_completed = basic_test_complete_message_handler;
   CCU_MessageHandler_Add(handler.type, &handler);
 
+  memset(&handler, 0, sizeof(handler));
   handler.type = CUMSG_ALL_COMPLETED;
   handler.func.all_completed = basic_all_tests_complete_message_handler;
   CCU_MessageHandler_Add(handler.type, &handler);
 
+  memset(&handler, 0, sizeof(handler));
   handler.type = CUMSG_SUITE_SETUP_FAILED;
   handler.func.suite_setup_failed = basic_suite_init_failure_message_handler;
   CCU_MessageHandler_Add(handler.type, &handler);
 
+  memset(&handler, 0, sizeof(handler));
   handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
   handler.func.suite_teardown_failed = basic_suite_cleanup_failure_message_handler;
   CCU_MessageHandler_Add(handler.type, &handler);

@@ -112,13 +112,13 @@ CU_EXPORT int CU_CI_main(int argc, char** argv) {
         fprintf(stdout, _("Starting CUnit test:\n %s\n"), argv[0]);
         CU_set_output_filename(CU_get_basename(argv[0]));
         CU_automated_enable_junit_xml(CU_TRUE);
+        CU_automated_package_name_set("CUnit");
+
         // if we can work out how to make report files then enable them
         if (CUE_SUCCESS != CU_initialize_junit_result_file()) {
             fprintf(stderr, "\n%s", _("ERROR - Failed to create/initialize the result file."));
             CU_automated_enable_junit_xml(CU_FALSE);
         } else {
-            CU_automated_package_name_set("CUnit");
-            CU_initialize_junit_result_file();
             CCU_automated_add_handlers();
             fprintf(stdout, _("JUnit XML:\n %s\n"), CU_automated_get_junit_filename());
         }
