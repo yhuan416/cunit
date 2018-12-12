@@ -53,7 +53,7 @@ set(cunit_srcs
 
 set(cunit_libs "")
 
-if(UNIX AND NOT CMAKE_SYSTEM_NAME MATCHES "Linux")
+if(UNIX AND NOT APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES "Linux")
   list(APPEND cunit_libs m)
 endif()
 
