@@ -36,13 +36,10 @@ set(CPACK_PACKAGE_CONTACT "inorton@gmail.com")
 set(CPACK_PACKAGE_FILE_NAME "cunit-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 include (CPack)
 
-find_package(Curses)
-
 FILE(GLOB Basic Sources/Basic/*.c)
 FILE(GLOB Automated Sources/Automated/*.c)
 FILE(GLOB Framework Sources/Framework/*.c)
 FILE(GLOB Console Sources/Console/*.c)
-FILE(GLOB Curses Sources/Curses/*.c)
 FILE(GLOB Test Sources/Test/*.c)
 FILE(GLOB CI Sources/CI/*.c)
 
@@ -55,16 +52,6 @@ set(cunit_srcs
   )
 
 set(cunit_libs "")
-
-
-if(NOT APPLE AND NOT WIN32)
-    if(CURSES_FOUND)
-        list(APPEND cunit_srcs ${Curses})
-        list(APPEND cunit_libs ${CURSES_LIBRARY})
-    else()
-        message(WARNING "curses not found - curses support disabled")
-    endif(CURSES_FOUND)
-endif()
 
 if(UNIX AND NOT CMAKE_SYSTEM_NAME MATCHES "Linux")
   list(APPEND cunit_libs m)
