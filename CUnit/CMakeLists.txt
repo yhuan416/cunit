@@ -1,7 +1,7 @@
 project(CUnit C)
 set(CUNIT_VERSION_MAJOR 3)
 set(CUNIT_VERSION_MINOR 0)
-set(CUNIT_VERSION_PATCH 5)
+set(CUNIT_VERSION_PATCH 6)
 set(CUNIT_VERSION "${CUNIT_VERSION_MAJOR}.${CUNIT_VERSION_MINOR}.${CUNIT_VERSION_PATCH}")
 set(CUNIT_RELEASE cunity)
 
@@ -66,21 +66,9 @@ if(NOT APPLE AND NOT WIN32)
     endif(CURSES_FOUND)
 endif()
 
-if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME MATCHES "Linux")
-  include(CheckFunctionExists)
-  CHECK_FUNCTION_EXISTS(fabs HAS_FABS)
-  if(NOT HAS_FABS)
-    unset(HAS_FABS)
-    list(APPEND CMAKE_REQUIRED_LIBRARIES m)
-    CHECK_FUNCTION_EXISTS(fabs HAS_FABS)
-    if(HAS_FABS)
-      list(APPEND cunit_libs m)
-    else()
-      message(FATAL_ERROR "No fabs() found")
-    endif()
-  endif()
+if(UNIX AND NOT CMAKE_SYSTEM_NAME MATCHES "Linux")
+  list(APPEND cunit_libs m)
 endif()
-
 
 add_library(cunit STATIC ${cunit_srcs})
 target_link_libraries(cunit
