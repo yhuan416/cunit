@@ -23,6 +23,7 @@ typedef enum CU_MessageType
     CUMSG_TEST_SETUP_FAILED,     /**< test setup has failed */
     CUMSG_TEST_TEARDOWN_FAILED,  /**< test teardown has failed */
     CUMSG_ALL_COMPLETED,         /**< all suites finished */
+    CUMSG_SUITE_SKIPPED,         /**< test suite was skipped during suite setup */
     CUMSG_MAX
 } CCU_MessageType;
 
@@ -36,6 +37,7 @@ typedef union CU_MessageHandlerFunction {
     CU_TestCompleteMessageHandler        test_completed;
     CU_TestSkippedMessageHandler         test_skipped;
     CU_AllTestsCompleteMessageHandler    all_completed;
+    CU_SuiteSkippedMessageHandler        suite_skipped;
 } CCU_MessageHandlerFunction;
 
 /**

@@ -97,6 +97,7 @@ static void console_test_complete_message_handler(const CU_pTest pTest, const CU
 static void console_all_tests_complete_message_handler(const CU_pFailureRecord pFailure);
 static void console_suite_init_failure_message_handler(const CU_pSuite pSuite);
 static void console_suite_cleanup_failure_message_handler(const CU_pSuite pSuite);
+static void console_suite_init_skipped_message_handler(const CU_pSuite pSuite);
 
 static CU_ErrorCode select_test(CU_pSuite pSuite, CU_pTest* ppTest);
 static CU_ErrorCode select_suite(CU_pTestRegistry pRegistry, CU_pSuite* ppSuite);
@@ -135,6 +136,7 @@ void CU_console_run_tests(void)
     CU_set_all_test_complete_handler(console_all_tests_complete_message_handler);
     CU_set_suite_init_failure_handler(console_suite_init_failure_message_handler);
     CU_set_suite_cleanup_failure_handler(console_suite_cleanup_failure_message_handler);
+    CU_set_suite_skipped_handler(console_suite_init_skipped_message_handler);
 
     console_registry_level_run(NULL);
   }
@@ -627,11 +629,11 @@ static void console_test_start_message_handler(const CU_pTest pTest, const CU_pS
   /* Comparing the Addresses rather than the Group Names. */
   if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) {
     fprintf(stdout, _("\nRunning Suite : %s"), pSuite->pName);
-    fprintf(stdout, _("\n     Running Test : %s"), pTest->pName);
+    fprintf(stdout, _("\n     Running Test : %-30s"), pTest->pName);
     f_pRunningSuite = pSuite;
   }
   else {
-    fprintf(stdout, _("\n     Running Test : %s"), pTest->pName);
+    fprintf(stdout, _("\n     Running Test : %-30s"), pTest->pName);
   }
 }
 
@@ -677,6 +679,11 @@ static void console_suite_init_failure_message_handler(const CU_pSuite pSuite)
 
   fprintf(stdout,
           _("\nWARNING - Suite initialization failed for '%s'."), pSuite->pName);
+}
+
+static void console_suite_init_skipped_message_handler(const CU_pSuite pSuite) {
+  fprintf(stdout,
+          _("SKIPPED"));
 }
 
 /*------------------------------------------------------------------------*/

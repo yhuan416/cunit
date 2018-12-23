@@ -98,6 +98,7 @@ static void automated_test_skipped_message_handler(const CU_pTest pTest, const C
 static void automated_all_tests_complete_message_handler(const CU_pFailureRecord pFailure);
 static void automated_suite_init_failure_message_handler(const CU_pSuite pSuite);
 static void automated_suite_cleanup_failure_message_handler(const CU_pSuite pSuite);
+static void automated_suite_skipped_message_handler(const CU_pSuite pSuite);
 
 
 void CCU_automated_add_handlers(void)
@@ -126,6 +127,10 @@ void CCU_automated_add_handlers(void)
 
     handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
     handler.func.suite_teardown_failed = automated_suite_cleanup_failure_message_handler;
+    CCU_MessageHandler_Add(handler.type, &handler);
+
+    handler.type = CUMSG_SUITE_SKIPPED;
+    handler.func.suite_teardown_failed = automated_suite_skipped_message_handler;
     CCU_MessageHandler_Add(handler.type, &handler);
 }
 
@@ -463,6 +468,22 @@ static void automated_test_complete_message_handler(const CU_pTest pTest,
   if (NULL != szTemp) {
     CU_FREE(szTemp);
   }
+}
+
+static void automated_suite_skipped_message_handler(const CU_pSuite pSuite) {
+    if (bJUnitXmlOutput == CU_TRUE) {
+        char *szTempName = (char *)CU_MALLOC((CU_translated_strlen(pSuite->pName) + 1));
+        assert (szTempName);
+        CU_translate_special_characters(pSuite->pName, szTempName, (CU_translated_strlen(pSuite->pName) + 1));
+
+        fprintf(f_pTestResultFile,
+                "  <testsuite errors=\"%d\" failures=\"%d\" tests=\"%d\" name=\"%s\" skipped=\"true\"> \n",
+                0 , /* Errors */
+                pSuite->uiNumberOfTestsFailed, /* Failures */
+                pSuite->uiNumberOfTests, /* Tests */
+                (NULL != szTempName) ? szTempName : ""); /* Name */
+        CU_FREE(szTempName);
+    }
 }
 
 /** Handler function called when a test is being skipped.

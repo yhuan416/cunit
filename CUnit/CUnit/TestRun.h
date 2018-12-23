@@ -118,6 +118,8 @@ typedef struct CU_RunSummary
   unsigned int nAssertsFailed;    /**< Number of failed assertions. */
   unsigned int nFailureRecords;   /**< Number of failure records generated. */
   double       ElapsedTime;       /**< Elapsed time for run in seconds. */
+  unsigned int nTestsSkipped;     /**< Number of tests skipped during execution */
+  unsigned int nSuitesSkipped;    /**< Number of suites skipped during execution */
 } CU_RunSummary;
 typedef CU_RunSummary* CU_pRunSummary;  /**< Pointer to CU_RunSummary. */
 
@@ -177,6 +179,10 @@ typedef void (*CU_SuiteCleanupFailureMessageHandler)(const CU_pSuite pSuite);
  *  The test run is considered in progress when the message handler is called.
  */
 
+typedef void (*CU_SuiteSkippedMessageHandler)(const CU_pSuite pSuite);
+/**< Message handler called when a suite is skipped during setup.
+ */
+
 /*--------------------------------------------------------------------
  * Get/Set functions for Message Handlers
  *--------------------------------------------------------------------*/
@@ -196,6 +202,9 @@ CU_EXPORT void CU_set_suite_init_failure_handler(CU_SuiteInitFailureMessageHandl
 /**< Sets the message handler to call when a suite initialization function returns an error. */
 CU_EXPORT void CU_set_suite_cleanup_failure_handler(CU_SuiteCleanupFailureMessageHandler pSuiteCleanupFailureMessage);
 /**< Sets the message handler to call when a suite cleanup function returns an error. */
+
+CU_EXPORT void CU_set_suite_skipped_handler(CU_SuiteSkippedMessageHandler pSuiteSkipped);
+/**< Sets the message handler to call when a suite is skipped */
 
 CU_EXPORT CU_SuiteStartMessageHandler          CU_get_suite_start_handler(void);
 /**< Retrieves the message handler called before each suite is run. */
@@ -440,6 +449,27 @@ CU_EXPORT CU_BOOL CU_assertImplementation(CU_BOOL bValue,
  *  @param bFatal        CU_TRUE to abort test (via longjmp()), CU_FALSE to continue test.
  *  @return As a convenience, returns the value of the assertion (i.e. bValue).
  */
+
+CU_EXPORT void CU_SkipImplementation(CU_BOOL bValue,
+                                     unsigned int uiLine,
+                                     const char *strCondition,
+                                     const char *strFile,
+                                     const char *strFunction);
+/**<
+ *  Skip Implementation
+ *  Called to skip execution of current test or current suite.
+ *  @param bValue        CU_TRUE to skip
+ *  @param uiLine        Line number of skip statement.
+ *  @param strCondition  String containing logical test that was failed.
+ *  @param strFile       Source file where skip happened.
+ *  @param strFunction   Function where test skip happened.
+ */
+
+/** Skip the current suite or test if true. */
+#define CU_SKIP_IF(value) \
+  { CU_SkipImplementation((value), __LINE__, ("CU_SKIP_IF(" #value ")"), __FILE__, ""); }
+
+
 
 #ifdef USE_DEPRECATED_CUNIT_NAMES
 typedef CU_FailureRecord  _TestResult;  /**< @deprecated Use CU_FailureRecord. */

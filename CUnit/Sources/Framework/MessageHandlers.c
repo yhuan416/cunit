@@ -136,6 +136,9 @@ static void _run_MessageHandler(CCU_MessageHandler *handler,
         case CUMSG_ALL_COMPLETED:
             handler->func.all_completed(pFailure);
             break;
+        case CUMSG_SUITE_SKIPPED:
+            handler->func.suite_skipped(pSuite);
+            break;
         default:
             break;
     }

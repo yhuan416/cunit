@@ -116,6 +116,7 @@ typedef struct CU_Test
   struct CU_Test* pNext;      /**< Pointer to the next test in linked list. */
   struct CU_Test* pPrev;      /**< Pointer to the previous test in linked list. */
 
+  CU_BOOL         fSkipped;   /**< Flag for whether the test was skipped during a run */
 } CU_Test;
 typedef CU_Test* CU_pTest;    /**< Pointer to a CUnit test case. */
 
@@ -166,6 +167,7 @@ typedef struct CU_Suite
   CU_BOOL           fCleanupError;   /**< Flag set if the suite cleanup function failed a CU_ASSERT*/
   CU_BOOL           fInSetUp;	     /**< Flag set if we are running the suite setup function */
   CU_BOOL           fInClean;	     /**< Flag set if we are running the suite cleanup function */
+  CU_BOOL           fSkipped;        /**< Flag for whether the suite was skipped during a run */
 } CU_Suite;
 typedef CU_Suite* CU_pSuite;          /**< Pointer to a CUnit suite. */
 
