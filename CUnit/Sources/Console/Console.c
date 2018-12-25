@@ -629,11 +629,11 @@ static void console_test_start_message_handler(const CU_pTest pTest, const CU_pS
   /* Comparing the Addresses rather than the Group Names. */
   if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) {
     fprintf(stdout, _("\nRunning Suite : %s"), pSuite->pName);
-    fprintf(stdout, _("\n     Running Test : %-30s"), pTest->pName);
+    fprintf(stdout, _("\n     %-45s"), pTest->pName);
     f_pRunningSuite = pSuite;
   }
   else {
-    fprintf(stdout, _("\n     Running Test : %-30s"), pTest->pName);
+    fprintf(stdout, _("\n     %-45s"), pTest->pName);
   }
 }
 

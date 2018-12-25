@@ -576,7 +576,7 @@ CU_EXPORT char * CU_get_run_results_string(void)
   if (result) {
     char *end = result;
     end += snprintf(end, max_result_len - (end - result),
-            "%-18s: %8s  %8s  %8s  %8s\n",
+            "%-18s- %8s  %8s  %8s  %8s\n",
                     _("Run Summary"), _("Run"), _("Failed"), _("Inactive"), _("Skipped"));
 
     end += snprintf(end, max_result_len - (end - result),

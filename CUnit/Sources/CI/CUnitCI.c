@@ -53,7 +53,7 @@ static void cu_ci_test_started(const CU_pTest pTest, const CU_pSuite pSuite)
 {
     assert(pSuite && "called without a test suite");
     if (pTest && pTest->pName) {
-        fprintf(stdout, _("\n     Running Test : %35s .."), pTest->pName);
+        fprintf(stdout, _("\n     %-45s .. "), pTest->pName);
     }
 }
 
