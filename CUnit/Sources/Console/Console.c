@@ -494,10 +494,10 @@ static void list_suites(CU_pTestRegistry pRegistry)
   if (0 == width[0]) {
     width[0] = (int) CU_number_width(pRegistry->uiNumberOfSuites) + 1;
     width[1] = 34;
-    width[2] = CU_MAX(strlen(_("Init?")), CU_MAX(f_yes_width, f_no_width)) + 1;
-    width[3] = CU_MAX(strlen(_("Cleanup?")), CU_MAX(f_yes_width, f_no_width)) + 1;
-    width[4] = CU_MAX(strlen(_("#Tests")), CU_number_width(pRegistry->uiNumberOfTests) + 1) + 1;
-    width[5] = CU_MAX(strlen(_("Active?")), CU_MAX(f_yes_width, f_no_width)) + 1;
+    width[2] = (int)CU_MAX(strlen(_("Init?")), CU_MAX(f_yes_width, f_no_width)) + 1;
+    width[3] = (int)CU_MAX(strlen(_("Cleanup?")), CU_MAX(f_yes_width, f_no_width)) + 1;
+    width[4] = (int)CU_MAX(strlen(_("#Tests")), CU_number_width(pRegistry->uiNumberOfTests) + 1) + 1;
+    width[5] = (int)CU_MAX(strlen(_("Active?")), CU_MAX(f_yes_width, f_no_width)) + 1;
   }
 
   fprintf(stdout, "\n%s",   _("--------------------- Registered Suites -----------------------------"));
@@ -548,10 +548,10 @@ static void list_tests(CU_pSuite pSuite)
   assert(NULL != pSuite->pTest);
 
   /* only number of tests can change between calls */
-  width[0] = CU_number_width(pSuite->uiNumberOfTests) + 1;
+  width[0] = (int)CU_number_width(pSuite->uiNumberOfTests) + 1;
   if (0 == width[1]) {
     width[1] = 34;
-    width[2] = CU_MAX(strlen(_("Active?")), CU_MAX(f_yes_width, f_no_width)) + 1;
+    width[2] = (int)CU_MAX(strlen(_("Active?")), CU_MAX(f_yes_width, f_no_width)) + 1;
   }
 
   fprintf(stdout, "\n%s",

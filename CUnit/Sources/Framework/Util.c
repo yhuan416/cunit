@@ -255,10 +255,10 @@ size_t CU_number_width(int number)
 const char* CU_get_basename(const char* path)
 {
   size_t path_len;
-  int i;
+  size_t i;
   assert(path && "expected a nul terminated path string");
   path_len = strlen(path);
-  /* start at the end and find the first path character (/ or \) */  
+  /* start at the end and find the first path character (/ or \) */
   for (i = path_len - 1; i >= 0; i--) {
     switch(path[i]) {
       case '/':

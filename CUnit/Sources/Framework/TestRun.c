@@ -530,40 +530,40 @@ CU_EXPORT char * CU_get_run_results_string(void)
   assert(NULL != pRunSummary);
   assert(NULL != pRegistry);
 
-  width[0] = strlen(_("Run Summary:"));
-  width[1] = CU_MAX(6,
+  width[0] = (int)strlen(_("Run Summary:"));
+  width[1] = (int)CU_MAX(6,
                     CU_MAX(strlen(_("Type")),
                            CU_MAX(strlen(_("suites")),
                                   CU_MAX(strlen(_("tests")),
                                          strlen(_("asserts")))))) + 1;
-  width[2] = CU_MAX(6,
+  width[2] = (int)CU_MAX(6,
                     CU_MAX(strlen(_("Total")),
                            CU_MAX(CU_number_width(pRegistry->uiNumberOfSuites),
                                   CU_MAX(CU_number_width(pRegistry->uiNumberOfTests),
                                          CU_number_width(pRunSummary->nAsserts))))) + 1;
-  width[3] = CU_MAX(6,
+  width[3] = (int)CU_MAX(6,
                     CU_MAX(strlen(_("Ran")),
                            CU_MAX(CU_number_width(pRunSummary->nSuitesRun),
                                   CU_MAX(CU_number_width(pRunSummary->nTestsRun),
                                          CU_number_width(pRunSummary->nAsserts))))) + 1;
-  width[4] = CU_MAX(6,
+  width[4] = (int)CU_MAX(6,
                     CU_MAX(strlen(_("Passed")),
                            CU_MAX(strlen(_("n/a")),
                                   CU_MAX(CU_number_width(pRunSummary->nTestsRun - pRunSummary->nTestsFailed),
                                          CU_number_width(pRunSummary->nAsserts - pRunSummary->nAssertsFailed))))) + 1;
-  width[5] = CU_MAX(6,
+  width[5] = (int)CU_MAX(6,
                     CU_MAX(strlen(_("Failed")),
                            CU_MAX(CU_number_width(pRunSummary->nSuitesFailed),
                                   CU_MAX(CU_number_width(pRunSummary->nTestsFailed),
                                          CU_number_width(pRunSummary->nAssertsFailed))))) + 1;
-  width[6] = CU_MAX(6,
+  width[6] = (int)CU_MAX(6,
                     CU_MAX(strlen(_("Inactive")),
                            CU_MAX(CU_number_width(pRunSummary->nSuitesInactive),
                                   CU_MAX(CU_number_width(pRunSummary->nTestsInactive),
                                          strlen(_("n/a")))))) + 1;
 
-  width[7] = strlen(_("Elapsed time = "));
-  width[8] = strlen(_(" seconds"));
+  width[7] = (int)strlen(_("Elapsed time = "));
+  width[8] = (int)strlen(_(" seconds"));
 
   len = 13 + 4*(width[0] + width[1] + width[2] + width[3] + width[4] + width[5] + width[6]) + width[7] + width[8] + 1;
   result = (char *)CU_MALLOC(len);
