@@ -14,6 +14,7 @@ stages:
     - cd cmake-build
     - cmake ..
     - cmake --build . -- -j4
+    - ctest --output-on-failure
     - ./CUnit/cunit_test
     - ./Examples/AutomatedTest/t-automated
     - junit2html --summary-matrix TestAutomated-Results.xml
@@ -76,7 +77,6 @@ cunit-ubuntu-17.10:
 
 cunit-win1803-vs2015:
   stage: build
-  allow_failure: true
   tags:
     - cunity-windows-docker-1803
   script:

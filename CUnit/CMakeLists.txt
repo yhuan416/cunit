@@ -1,7 +1,8 @@
 project(CUnit C)
+
 set(CUNIT_VERSION_MAJOR 3)
 set(CUNIT_VERSION_MINOR 0)
-set(CUNIT_VERSION_PATCH 7)
+set(CUNIT_VERSION_PATCH 8)
 set(CUNIT_VERSION "${CUNIT_VERSION_MAJOR}.${CUNIT_VERSION_MINOR}.${CUNIT_VERSION_PATCH}")
 set(CUNIT_RELEASE cunity)
 
@@ -72,6 +73,9 @@ add_executable(cunit_test
   ${cunit_srcs}
   ${Test}
   )
+
+add_test(NAME 
+  cunit_test COMMAND $<TARGET_FILE:cunit_test>)
 
 target_include_directories(cunit_test
   PRIVATE

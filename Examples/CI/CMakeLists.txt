@@ -23,3 +23,10 @@ target_link_libraries(
         cicd-multi-suite
         cunit
 )
+
+add_test(NAME 
+  cicd-pass-plain COMMAND $<TARGET_FILE:cicd-pass-plain>)
+add_test(NAME
+  cicd-multi-suite COMMAND $<TARGET_FILE:cicd-multi-suite>)
+add_test(NAME 
+  cicd-pass-setupfuncs COMMAND $<TARGET_FILE:cicd-pass-setupfuncs>)
