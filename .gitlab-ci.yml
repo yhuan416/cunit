@@ -25,6 +25,7 @@ stages:
     - cpack -G TGZ CUnit
   artifacts:
     paths:
+    - CUnit/CUnit/CUnitCI.h
     - cmake-build/cunit-*.tar.gz
     - cmake-build/cunit-*.deb
     - cmake-build/Examples/CI/*-Results.*
@@ -88,6 +89,8 @@ cunit-win1803-vs2015:
 pages:
   image: registry.gitlab.com/cunity/doxygen-image/ubuntu-18.04-doxygen:master
   stage: release
+  dependencies:
+  - cunit-ubuntu-18.04
   script:
   - doxygen Doxyfile
   - mv doc/html/ public/
