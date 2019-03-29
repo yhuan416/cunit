@@ -45,7 +45,7 @@ CU_TEST_SETUP() {
     CU_SKIP_IF(test_setup_count++ > 2);
 }
 
-CUNIT_CI_RUN("cicd-pass-skips",
+CUNIT_CI_RUN(CU_MAIN_EXE_NAME,
              CUNIT_CI_TEST(test_simple_pass1),
              CUNIT_CI_TEST(test_skipped),
              CUNIT_CI_TEST(test_simple_pass2),

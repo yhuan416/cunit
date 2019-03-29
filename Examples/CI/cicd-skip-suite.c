@@ -29,7 +29,7 @@ CU_SUITE_SETUP() {
     CU_SKIP_IF(1 > 0);
 }
 
-CUNIT_CI_RUN("cicd-skip-suite",
+CUNIT_CI_RUN(CU_MAIN_EXE_NAME,
              CUNIT_CI_TEST(test_simple_never_run1),
              CUNIT_CI_TEST(test_simple_never_run2)
 );
