@@ -95,7 +95,7 @@ static CU_pTest  f_pCurTest  = NULL;          /**< Pointer to the test currently
 
 
 /** CU_RunSummary to hold results of each test run. */
-static CU_RunSummary f_run_summary = {"", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+static CU_RunSummary f_run_summary = {"", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 /** CU_pFailureRecord to hold head of failure record list of each test run. */
 static CU_pFailureRecord f_failure_list = NULL;
@@ -160,6 +160,41 @@ CU_BOOL CU_assertImplementation(CU_BOOL bValue,
   }
 
   return bValue;
+}
+
+void CU_SkipImplementation(CU_BOOL value,
+                           unsigned int uiLine,
+                           const char *strCondition,
+                           const char *strFile,
+                           const char *strFunction)
+{
+  /* not used in current implementation - stop compiler warning */
+  CU_UNREFERENCED_PARAMETER(strFunction);
+
+  /* these should always be non-NULL (i.e. a test run is in progress) */
+  assert(NULL != f_pCurSuite);
+
+
+  if (value) {
+    /* skip the current test or suite */
+
+    if (f_pCurSuite->fInSetUp) {
+      ++f_run_summary.nSuitesSkipped;
+      /* we are in a suite setup function */
+      f_pCurSuite->fSkipped = CU_TRUE;
+      f_pCurSuite->fActive = CU_FALSE;
+    }
+
+    if(f_pCurTest) {
+      ++f_run_summary.nTestsSkipped;
+      f_pCurTest->fSkipped = CU_TRUE;
+      f_pCurTest->fActive = CU_FALSE;
+      /* we are in a test */
+      if (NULL != f_pCurTest->pJumpBuf) {
+          longjmp(*(f_pCurTest->pJumpBuf), 1);
+      }
+    }
+  }
 }
 
 /*------------------------------------------------------------------------*/
@@ -231,6 +266,14 @@ void CU_set_suite_cleanup_failure_handler(CU_SuiteCleanupFailureMessageHandler p
   CCU_MessageHandler handler = {0};
   handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
   handler.func.suite_teardown_failed = pSuiteCleanupFailureHandler;
+  CCU_MessageHandler_Set(handler.type, &handler);
+}
+
+void CU_set_suite_skipped_handler(CU_SuiteSkippedMessageHandler pSkippedHandler)
+{
+  CCU_MessageHandler handler = {0};
+  handler.type = CUMSG_SUITE_SKIPPED;
+  handler.func.suite_teardown_failed = pSkippedHandler;
   CCU_MessageHandler_Set(handler.type, &handler);
 }
 
@@ -521,92 +564,41 @@ CU_EXPORT void CU_print_run_results(FILE *file)
 CU_EXPORT char * CU_get_run_results_string(void)
 
 {
-  CU_pRunSummary pRunSummary = &f_run_summary;
-  CU_pTestRegistry pRegistry = CU_get_registry();
-  int width[9];
-  size_t len;
+  CU_pRunSummary s = &f_run_summary;
+  CU_pTestRegistry r = CU_get_registry();
+  size_t max_result_len = 8192;
   char *result;
 
-  assert(NULL != pRunSummary);
-  assert(NULL != pRegistry);
+  assert(NULL != s);
+  assert(NULL != r);
 
-  width[0] = (int)strlen(_("Run Summary:"));
-  width[1] = (int)CU_MAX(6,
-                    CU_MAX(strlen(_("Type")),
-                           CU_MAX(strlen(_("suites")),
-                                  CU_MAX(strlen(_("tests")),
-                                         strlen(_("asserts")))))) + 1;
-  width[2] = (int)CU_MAX(6,
-                    CU_MAX(strlen(_("Total")),
-                           CU_MAX(CU_number_width(pRegistry->uiNumberOfSuites),
-                                  CU_MAX(CU_number_width(pRegistry->uiNumberOfTests),
-                                         CU_number_width(pRunSummary->nAsserts))))) + 1;
-  width[3] = (int)CU_MAX(6,
-                    CU_MAX(strlen(_("Ran")),
-                           CU_MAX(CU_number_width(pRunSummary->nSuitesRun),
-                                  CU_MAX(CU_number_width(pRunSummary->nTestsRun),
-                                         CU_number_width(pRunSummary->nAsserts))))) + 1;
-  width[4] = (int)CU_MAX(6,
-                    CU_MAX(strlen(_("Passed")),
-                           CU_MAX(strlen(_("n/a")),
-                                  CU_MAX(CU_number_width(pRunSummary->nTestsRun - pRunSummary->nTestsFailed),
-                                         CU_number_width(pRunSummary->nAsserts - pRunSummary->nAssertsFailed))))) + 1;
-  width[5] = (int)CU_MAX(6,
-                    CU_MAX(strlen(_("Failed")),
-                           CU_MAX(CU_number_width(pRunSummary->nSuitesFailed),
-                                  CU_MAX(CU_number_width(pRunSummary->nTestsFailed),
-                                         CU_number_width(pRunSummary->nAssertsFailed))))) + 1;
-  width[6] = (int)CU_MAX(6,
-                    CU_MAX(strlen(_("Inactive")),
-                           CU_MAX(CU_number_width(pRunSummary->nSuitesInactive),
-                                  CU_MAX(CU_number_width(pRunSummary->nTestsInactive),
-                                         strlen(_("n/a")))))) + 1;
+  result = CU_MALLOC(max_result_len);
+  if (result) {
+    char *end = result;
+    end += snprintf(end, max_result_len - (end - result),
+            "%-18s- %8s  %8s  %8s  %8s\n",
+                    _("Run Summary"), _("Run"), _("Failed"), _("Inactive"), _("Skipped"));
 
-  width[7] = (int)strlen(_("Elapsed time = "));
-  width[8] = (int)strlen(_(" seconds"));
+    end += snprintf(end, max_result_len - (end - result),
+            "     %-13s: %8d  %8d  %8d  %8d\n",
+                    _("Suites"), s->nSuitesRun, s->nSuitesFailed, s->nSuitesInactive, s->nSuitesSkipped);
 
-  len = 13 + 4*(width[0] + width[1] + width[2] + width[3] + width[4] + width[5] + width[6]) + width[7] + width[8] + 1;
-  result = (char *)CU_MALLOC(len);
 
-  if (NULL != result) {
-    snprintf(result, len, "%*s%*s%*s%*s%*s%*s%*s\n"   /* if you change this, be sure  */
-                          "%*s%*s%*u%*u%*s%*u%*u\n"   /* to change the calculation of */
-                          "%*s%*s%*u%*u%*u%*u%*u\n"   /* len above!                   */
-                          "%*s%*s%*u%*u%*u%*u%*s\n\n"
-                          "%*s%8.3f%*s",
-            width[0], _("Run Summary:"),
-            width[1], _("Type"),
-            width[2], _("Total"),
-            width[3], _("Ran"),
-            width[4], _("Passed"),
-            width[5], _("Failed"),
-            width[6], _("Inactive"),
-            width[0], " ",
-            width[1], _("suites"),
-            width[2], pRegistry->uiNumberOfSuites,
-            width[3], pRunSummary->nSuitesRun,
-            width[4], _("n/a"),
-            width[5], pRunSummary->nSuitesFailed,
-            width[6], pRunSummary->nSuitesInactive,
-            width[0], " ",
-            width[1], _("tests"),
-            width[2], pRegistry->uiNumberOfTests,
-            width[3], pRunSummary->nTestsRun,
-            width[4], pRunSummary->nTestsRun - pRunSummary->nTestsFailed,
-            width[5], pRunSummary->nTestsFailed,
-            width[6], pRunSummary->nTestsInactive,
-            width[0], " ",
-            width[1], _("asserts"),
-            width[2], pRunSummary->nAsserts,
-            width[3], pRunSummary->nAsserts,
-            width[4], pRunSummary->nAsserts - pRunSummary->nAssertsFailed,
-            width[5], pRunSummary->nAssertsFailed,
-            width[6], _("n/a"),
-            width[7], _("Elapsed time = "), CU_get_elapsed_time(),  /* makes sure time is updated */
-            width[8], _(" seconds")
-            );
-     result[len-1] = '\0';
+    end += snprintf(end, max_result_len - (end - result),
+            "     %-13s: %8d  %8d  %8s  %8s\n",
+                    _("Asserts"), s->nAsserts, s->nAssertsFailed, _("n/a"), _("n/a"));
+
+    end += snprintf(end, max_result_len - (end - result),
+                    "     %-13s: %8d  %8d  %8d  %8d\n",
+                    _("Tests"), s->nTestsRun - s->nTestsSkipped, s->nTestsFailed, s->nTestsInactive, s->nTestsSkipped);
+
+
+    end += snprintf(end, max_result_len - (end - result),
+                    "\n");
+    snprintf(end, max_result_len - (end - result),
+             "%-10s: %.3f(s)\n", _("Elapsed Time"), s->ElapsedTime);
   }
+
   return result;
 }
 
@@ -819,14 +811,20 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
       }
       pSuite->fInSetUp = CU_FALSE;
 
-      if (result != CUE_SUCCESS) {
-        /* init function had an error - call handler, if any */
-        CCU_MessageHandler_Run(CUMSG_SUITE_SETUP_FAILED, pSuite, NULL, NULL);
-        pRunSummary->nSuitesFailed++;
-        add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
-                    _("Suite Initialization failed - Suite Skipped"),
-                    _("CUnit System"), pSuite, NULL);
-        result = CUE_SINIT_FAILED;
+      if (pSuite->fSkipped == CU_TRUE) {
+        /* skipping the whole suite */
+        CCU_MessageHandler_Run(CUMSG_SUITE_SKIPPED, pSuite, NULL, NULL);
+        return CUE_SUCCESS;
+      } else {
+        if (result != CUE_SUCCESS) {
+          /* init function had an error - call handler, if any */
+          CCU_MessageHandler_Run(CUMSG_SUITE_SETUP_FAILED, pSuite, NULL, NULL);
+          pRunSummary->nSuitesFailed++;
+          add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
+                      _("Suite Initialization failed - Suite Skipped"),
+                      _("CUnit System"), pSuite, NULL);
+          result = CUE_SINIT_FAILED;
+        }
       }
     }
 
@@ -954,11 +952,14 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
       (*f_pCurSuite->pSetUpFunc)();
     }
 
-    /* set jmp_buf and run test */
-    pTest->pJumpBuf = buf;
-    if (0 == setjmp(*buf)) {
-      if (NULL != pTest->pTestFunc) {
-        (*pTest->pTestFunc)();
+    if ((!f_pCurSuite->fSkipped) && (!f_pCurTest->fSkipped)) {
+
+      /* set jmp_buf and run test */
+      pTest->pJumpBuf = buf;
+      if (0 == setjmp(*buf)) {
+        if (NULL != pTest->pTestFunc) {
+          (*pTest->pTestFunc)();
+        }
       }
     }
 
@@ -991,7 +992,11 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
     pLastFailure = NULL;                   /* no additional failure - set to NULL */
   }
 
-  CCU_MessageHandler_Run(CUMSG_TEST_COMPLETED, f_pCurSuite, f_pCurTest, pLastFailure);
+  if (f_pCurTest && f_pCurTest->fSkipped) {
+      CCU_MessageHandler_Run(CUMSG_TEST_SKIPPED, f_pCurSuite, f_pCurTest, pLastFailure);
+  } else {
+      CCU_MessageHandler_Run(CUMSG_TEST_COMPLETED, f_pCurSuite, f_pCurTest, pLastFailure);
+  }
 
   CU_FREE(pTest->pJumpBuf);
   pTest->pJumpBuf = NULL;

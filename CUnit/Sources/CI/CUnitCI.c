@@ -53,8 +53,13 @@ static void cu_ci_test_started(const CU_pTest pTest, const CU_pSuite pSuite)
 {
     assert(pSuite && "called without a test suite");
     if (pTest && pTest->pName) {
-        fprintf(stdout, _("\n     Running Test : %s .."), pTest->pName);
+        fprintf(stdout, _("\n     %-45s .. "), pTest->pName);
     }
+}
+
+static void cu_ci_test_skipped(const CU_pTest pTest, const CU_pSuite pSuite)
+{
+    fprintf(stdout, _("SKIPPED"));
 }
 
 static void cu_ci_test_completed(const CU_pTest pTest,
@@ -101,6 +106,10 @@ static void setup_handlers(void) {
 
     handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
     handler.func.suite_setup_failed = cu_ci_suite_cleanup_failed;
+    CCU_MessageHandler_Add(handler.type, &handler);
+
+    handler.type = CUMSG_TEST_SKIPPED;
+    handler.func.test_skipped = cu_ci_test_skipped;
     CCU_MessageHandler_Add(handler.type, &handler);
 }
 

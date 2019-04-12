@@ -246,6 +246,13 @@ static void basic_test_start_message_handler(const CU_pTest pTest, const CU_pSui
   }
 }
 
+static void basic_test_skipped_message_handler(const CU_pTest pTest)
+{
+  if (CU_BRM_VERBOSE == f_run_mode) {
+    fprintf(stdout, _("SKIPPED"));
+  }
+}
+
 /*------------------------------------------------------------------------*/
 /** Handler function called at completion of each test.
  *  @param pTest   The test being run.
@@ -356,6 +363,11 @@ void CCU_basic_add_handlers(void)
   memset(&handler, 0, sizeof(handler));
   handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
   handler.func.suite_teardown_failed = basic_suite_cleanup_failure_message_handler;
+  CCU_MessageHandler_Add(handler.type, &handler);
+
+  memset(&handler, 0, sizeof(handler));
+  handler.type = CUMSG_TEST_SKIPPED;
+  handler.func.test_skipped = basic_test_skipped_message_handler;
   CCU_MessageHandler_Add(handler.type, &handler);
 }
 

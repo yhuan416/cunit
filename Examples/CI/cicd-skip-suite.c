@@ -1,5 +1,5 @@
 /**
- * Simple CICD example with no setup/teardown
+ * Simple CICD example to demonstrate skipping suites
  *
  *  CUnit - A Unit testing framework library for C.
  *  Copyright (C) 2001       Anil Kumar
@@ -15,9 +15,21 @@
 #include "CUnit/CUnitCI.h"
 
 
-static void test_simple_pass1(void) {
-    CU_ASSERT_FATAL(1 == 1);
+static void test_simple_never_run1(void) {
+    /* this test is never executed because the suite will be skipped */
+    CU_ASSERT_FATAL(1 == 2);
+}
+
+static void test_simple_never_run2(void) {
+    /* this test is never executed because the suite will be skipped */
+    CU_ASSERT_FATAL(1 == 2);
+}
+
+CU_SUITE_SETUP() {
+    CU_SKIP_IF(1 > 0);
 }
 
 CUNIT_CI_RUN(CU_MAIN_EXE_NAME,
-             CUNIT_CI_TEST(test_simple_pass1));
+             CUNIT_CI_TEST(test_simple_never_run1),
+             CUNIT_CI_TEST(test_simple_never_run2)
+);

@@ -134,6 +134,8 @@ CU_EXPORT const char* CU_get_basename(const char* path);
  *  Given a file path, return a pointer to the last component (the basename)
  */
 
+#define CU_MAIN_EXE_NAME CU_get_basename(argv[0])
+
 #ifdef CUNIT_BUILD_TESTS
 void test_cunit_Util(void);
 #endif

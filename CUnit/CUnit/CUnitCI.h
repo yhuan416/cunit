@@ -35,6 +35,7 @@
 #define CCU_CUNITCI_H
 
 #include "CUnit/CUnit.h"
+#include "CUnit/Util.h"
 
 #ifdef __cplusplus
 extern "C" {

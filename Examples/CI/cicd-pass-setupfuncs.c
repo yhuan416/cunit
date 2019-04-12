@@ -60,7 +60,7 @@ static void test_simple_pass2(void) {
     CU_ASSERT_FATAL(test_teardown_count == 1);
 }
 
-CUNIT_CI_RUN("cicd-pass-setupfuncs",
+CUNIT_CI_RUN(CU_MAIN_EXE_NAME,
              CUNIT_CI_TEST(test_simple_pass1),
              CUNIT_CI_TEST(test_simple_pass2)
 );
