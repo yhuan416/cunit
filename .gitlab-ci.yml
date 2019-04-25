@@ -86,6 +86,16 @@ cunit-win1803-vs2015:
     - docker run --rm -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\build-x64.bat
     - docker run --rm -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\test-x64.bat
 
+cunit-solaris-amd64:
+  stage: build
+  tags:
+    - solaris-11-amd64
+  script:
+    - mkdir bld
+    - cd bld
+    - cmake ..
+    - cmake --build .
+
 pages:
   image: registry.gitlab.com/cunity/doxygen-image/ubuntu-18.04-doxygen:master
   stage: release
