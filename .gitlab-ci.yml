@@ -81,8 +81,14 @@ cunit-win1803-vs2015:
   tags:
     - cunity-windows-1803-docker
   script:
-    - VS2015\build-x64.bat || exit /b
-    - VS2015\test-x64.bat || exit /b
+    - mkdir bld
+    - cd bld
+    - cmake -G "Visual Studio 14 2015 Win64" .. || exit /b
+    - cmake --build . --config Release || exit /b
+    - ctest -C Release || exit \b
+  artifacts:
+    paths:
+      - bld/Examples/CI/*-Results.*
 
 cunit-solaris-amd64:
   stage: build
