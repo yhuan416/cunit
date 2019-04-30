@@ -27,6 +27,7 @@ static void test_simple_never_run2(void) {
 
 CU_SUITE_SETUP() {
     CU_SKIP_IF(1 > 0);
+    return CUE_SUCCESS;
 }
 
 CUNIT_CI_RUN(CU_MAIN_EXE_NAME,

@@ -77,14 +77,18 @@ cunit-ubuntu-17.10:
 
 cunit-win1803-vs2015:
   stage: build
+  image: cunity/windows-1803-cmake:latest
   tags:
-    - cunity-windows-docker-1803
+    - cunity-windows-1803-docker
   script:
-    - git clean -f -d -x .
-    - $cwd = $(pwd).Path
-    - docker pull $Env:WINDOWS_CMAKE_IMAGE
-    - docker run --rm -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\build-x64.bat
-    - docker run --rm -v $("$cwd" + ":c:\build:rw") -w c:\build\ --rm $Env:WINDOWS_CMAKE_IMAGE VS2015\test-x64.bat
+    - mkdir bld
+    - cd bld
+    - cmake -G "Visual Studio 14 2015 Win64" .. || exit /b
+    - cmake --build . --config Release || exit /b
+    - ctest -C Release || exit \b
+  artifacts:
+    paths:
+      - bld/Examples/CI/*-Results.*
 
 cunit-solaris-amd64:
   stage: build
