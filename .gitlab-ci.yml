@@ -75,11 +75,7 @@ cunit-ubuntu-17.10:
   stage: build
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-17.10:master
 
-cunit-win1803-vs2015:
-  stage: build
-  image: cunity/windows-1803-cmake:latest
-  tags:
-    - cunity-windows-1803-docker
+.vs2015: &vs2015
   script:
     - mkdir bld
     - cd bld
@@ -89,6 +85,20 @@ cunit-win1803-vs2015:
   artifacts:
     paths:
       - bld/Examples/CI/*-Results.*
+
+cunit-win1803-vs2015:
+  stage: build
+  image: cunity/windows-1803-cmake:latest
+  tags:
+    - cunity-windows-1803-docker
+  <<: *vs2015
+
+cunit-win2019-vs2015:
+  stage: build
+  image: registry.gitlab.com/cunity/windows-cmake-docker/win2019-vs2015:master
+  tags:
+    - cunity-windows-2019-docker
+  <<: *vs2015
 
 cunit-solaris-amd64:
   stage: build
