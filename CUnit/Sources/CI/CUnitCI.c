@@ -31,8 +31,8 @@
 #include "CUnit/Basic.h"
 #include "CUnit/MessageHandlers.h"
 #include "CUnit/Util.h"
-
 #include "CUnit/CUnit_intl.h"
+#include "CUnit/CUnitCITypes.h"
 
 #if defined(_WIN32) || defined(WIN32)
 #include <direct.h>
@@ -53,13 +53,13 @@ static void cu_ci_test_started(const CU_pTest pTest, const CU_pSuite pSuite)
 {
     assert(pSuite && "called without a test suite");
     if (pTest && pTest->pName) {
-        fprintf(stdout, _("\n     %-45s .. "), pTest->pName);
+        fprintf(stdout, _("\n     Running Test : %s .."), pTest->pName);
     }
 }
 
 static void cu_ci_test_skipped(const CU_pTest pTest, const CU_pSuite pSuite)
 {
-    fprintf(stdout, _("SKIPPED"));
+  fprintf(stdout, _("SKIPPED"));
 }
 
 static void cu_ci_test_completed(const CU_pTest pTest,
@@ -113,10 +113,8 @@ static void setup_handlers(void) {
     CCU_MessageHandler_Add(handler.type, &handler);
 }
 
-
 CU_EXPORT int CU_CI_main(int argc, char** argv) {
     int ret = -1;
-
     if (argc > 0) {
         fprintf(stdout, _("Starting CUnit test:\n %s\n"), argv[0]);
         CU_set_output_filename(CU_get_basename(argv[0]));
@@ -175,4 +173,3 @@ CU_EXPORT void CU_CI_add_test(const char* name, CU_TestFunc test)
     assert(current_suite && "CU_CI_DEFINE_SUITE not called");
     CU_add_test(current_suite, name, test);
 }
-

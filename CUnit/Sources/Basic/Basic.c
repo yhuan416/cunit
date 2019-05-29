@@ -246,7 +246,7 @@ static void basic_test_start_message_handler(const CU_pTest pTest, const CU_pSui
   }
 }
 
-static void basic_test_skipped_message_handler(const CU_pTest pTest)
+static void basic_test_skipped_message_handler(const CU_pTest pTest, const CU_pSuite pSuite)
 {
   if (CU_BRM_VERBOSE == f_run_mode) {
     fprintf(stdout, _("SKIPPED"));

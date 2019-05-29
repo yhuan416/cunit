@@ -34,8 +34,7 @@
 #ifndef CCU_CUNITCI_H
 #define CCU_CUNITCI_H
 
-#include "CUnit/CUnit.h"
-#include "CUnit/Util.h"
+#include "CUnit/CUnitCITypes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,39 +65,6 @@ extern "C" {
  */
 #define CUNIT_CI_TEST(test) \
     CU_CI_add_test(#test, test)
-
-/**
- * Main Entry point to CI mode of CUnit
- * @param argc command line args count
- * @param argv vector of command line args
- * @return non-zero on test failure
- */
-CU_EXPORT int CU_CI_main(int argc, char** argv);
-
-/**
- * Add a suite to CUnit CI
- * @param name suite name
- * @param init optional suite setup function
- * @param clean optional suite cleanup function
- * @param setup optional per test setup function
- * @param teardown optional per test cleanup function
- */
-CU_EXPORT void CU_CI_add_suite(
-        const char* name,
-        CU_InitializeFunc init,
-        CU_CleanupFunc clean,
-        CU_SetUpFunc setup,
-        CU_TearDownFunc teardown
-);
-
-/**
- * Add a test to the current CUnit CI suite
- * @param name test name
- * @param test test function
- */
-CU_EXPORT void CU_CI_add_test(const char* name, CU_TestFunc test);
-
-
 
 #define CU_SUITE_SETUP_FUNCNAME    __CUnit_suite_setup
 #define CU_SUITE_TEARDOWN_FUNCNAME __CUnit_suite_teardown
@@ -151,6 +117,18 @@ int main(int argc, char** argv) {       \
     __VA_ARGS__                  ;      \
     return CU_CI_main(argc, argv); }
 
+
+/**
+ * Disable CUCI setup/teardown and silence compiler warnings about unused variables.
+ */
+#define CUNIT_CI_CLEAR_SETUPS()                                                             \
+do {                                                                                        \
+  __cu_suite_setup = NULL;                                                                  \
+  __cu_suite_teardown = NULL;                                                               \
+  __cu_test_setup = NULL;                                                                   \
+  __cu_test_teardown = NULL;                                                                \
+  (void)(__cu_suite_setup || __cu_suite_teardown || __cu_test_setup || __cu_test_teardown );\
+} while (0)
 
 #ifdef __cplusplus
 }

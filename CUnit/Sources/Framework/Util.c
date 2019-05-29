@@ -259,7 +259,7 @@ const char* CU_get_basename(const char* path)
   assert(path && "expected a nul terminated path string");
   path_len = strlen(path);
   /* start at the end and find the first path character (/ or \) */
-  for (i = path_len - 1; i >= 0; i--) {
+  for (i = path_len - 1; path_len ; i--) {
     switch(path[i]) {
       case '/':
         return path + i + 1;
@@ -268,6 +268,7 @@ const char* CU_get_basename(const char* path)
       default:
         break;
     }
+    if (!i) break;
   }
 
   /* there were not path components at all, probably this was on PATH */

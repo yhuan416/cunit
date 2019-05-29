@@ -24,6 +24,7 @@ static void test_two(void) {
 
 
 int main(int argc, char** argv) {
+    CUNIT_CI_CLEAR_SETUPS();
     CU_CI_DEFINE_SUITE("first suite", 0, 0, 0, 0);
     CUNIT_CI_TEST(test_one);
 
