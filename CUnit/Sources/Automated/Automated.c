@@ -160,7 +160,6 @@ void CU_automated_run_tests(void)
     f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
 
     automated_run_all_tests(NULL);
-
   }
 }
 
@@ -218,7 +217,7 @@ static void automated_run_all_tests(CU_pTestRegistry pRegistry)
 {
   CU_pTestRegistry pOldRegistry = NULL;
 
-  assert(NULL != f_pTestResultFile);
+  if (!bJUnitXmlOutput) assert(NULL != f_pTestResultFile);
 
   f_pRunningSuite = NULL;
 
@@ -240,37 +239,36 @@ static void automated_run_all_tests(CU_pTestRegistry pRegistry)
  */
 static CU_ErrorCode initialize_result_file(const char* szFilename)
 {
-  CU_pRunSummary pRunSummary = CU_get_run_summary();
-
   CU_set_error(CUE_SUCCESS);
 
   if ((NULL == szFilename) || (strlen(szFilename) == 0)) {
     CU_set_error(CUE_BAD_FILENAME);
   }
-  else if (NULL == (f_pTestResultFile = fopen(szFilename, "w"))) {
+
+  if (bJUnitXmlOutput) {
+    /* make a zero byte file right now so we don't seem like we have passed */
+    FILE *outfile = fopen(szFilename, "w");
+    if (!outfile) {
+      CU_set_error(CUE_FOPEN_FAILED);
+    }
+    if (fclose(outfile)){
+      CU_set_error(CUE_FCLOSE_FAILED);
+    }
+    return CU_get_error();
+  }
+
+  if (NULL == (f_pTestResultFile = fopen(szFilename, "w"))) {
     CU_set_error(CUE_FOPEN_FAILED);
   }
   else {
     setvbuf(f_pTestResultFile, NULL, _IONBF, 0);
-
-    if (bJUnitXmlOutput == CU_TRUE) {
-      fprintf(f_pTestResultFile,
-              "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-              "<testsuites errors=\"0\" failures=\"%d\" tests=\"%d\" name=\"%s\"> \n",
-              pRunSummary->nTestsFailed,
-              pRunSummary->nTestsRun,
-              szFilename
-      );
-    } else {
-      fprintf(f_pTestResultFile,
-              "<?xml version=\"1.0\" ?> \n"
-              "<?xml-stylesheet type=\"text/xsl\" href=\"CUnit-Run.xsl\" ?> \n"
-              "<!DOCTYPE CUNIT_TEST_RUN_REPORT SYSTEM \"CUnit-Run.dtd\"> \n"
-              "<CUNIT_TEST_RUN_REPORT> \n"
-              "  <CUNIT_HEADER/> \n");
-    }
+    fprintf(f_pTestResultFile,
+            "<?xml version=\"1.0\" ?> \n"
+            "<?xml-stylesheet type=\"text/xsl\" href=\"CUnit-Run.xsl\" ?> \n"
+            "<!DOCTYPE CUNIT_TEST_RUN_REPORT SYSTEM \"CUnit-Run.dtd\"> \n"
+            "<CUNIT_TEST_RUN_REPORT> \n"
+            "  <CUNIT_HEADER/> \n");
   }
-
   return CU_get_error();
 }
 
@@ -296,46 +294,31 @@ static void automated_test_start_message_handler(const CU_pTest pTest, const CU_
 	char *szTempName = NULL;
 	size_t szTempName_len = 0;
 
-  CU_UNREFERENCED_PARAMETER(pTest);   /* not currently used */
-
   assert(NULL != pTest);
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);
+
+  if (bJUnitXmlOutput)
+    return;
+
   assert(NULL != f_pTestResultFile);
 
   /* write suite close/open tags if this is the 1st test for this szSuite */
   if ((NULL == f_pRunningSuite) || (f_pRunningSuite != pSuite)) {
     if (CU_TRUE == f_bWriting_CUNIT_RUN_SUITE) {
-      if (bJUnitXmlOutput == CU_TRUE) {
-        fprintf(f_pTestResultFile,
-                "    </testsuite>\n");
-      }
-      else {
-        fprintf(f_pTestResultFile,
-                "      </CUNIT_RUN_SUITE_SUCCESS> \n"
-                "    </CUNIT_RUN_SUITE> \n");
-      }
+      fprintf(f_pTestResultFile,
+              "      </CUNIT_RUN_SUITE_SUCCESS> \n"
+              "    </CUNIT_RUN_SUITE> \n");
     }
 
   /* translate suite name that may contain XML control characters */
   szTempName = (char *)CU_MALLOC((szTempName_len = CU_translated_strlen(pSuite->pName) + 1));
   CU_translate_special_characters(pSuite->pName, szTempName, szTempName_len);
-
-    if (bJUnitXmlOutput == CU_TRUE) {
-      fprintf(f_pTestResultFile,
-              "  <testsuite errors=\"%d\" failures=\"%d\" tests=\"%d\" name=\"%s\"> \n",
-              0 , /* Errors */
-              pSuite->uiNumberOfTestsFailed, /* Failures */
-              pSuite->uiNumberOfTests, /* Tests */
-              (NULL != szTempName) ? szTempName : ""); /* Name */
-    } else {
-      fprintf(f_pTestResultFile,
-              "    <CUNIT_RUN_SUITE> \n"
-              "      <CUNIT_RUN_SUITE_SUCCESS> \n"
-              "        <SUITE_NAME> %s </SUITE_NAME> \n",
-              (NULL != szTempName ? szTempName : ""));
-    }
-
+    fprintf(f_pTestResultFile,
+            "    <CUNIT_RUN_SUITE> \n"
+            "      <CUNIT_RUN_SUITE_SUCCESS> \n"
+            "        <SUITE_NAME> %s </SUITE_NAME> \n",
+            (NULL != szTempName ? szTempName : ""));
     f_bWriting_CUNIT_RUN_SUITE = CU_TRUE;
     f_pRunningSuite = pSuite;
   }
@@ -359,40 +342,18 @@ static void automated_test_complete_message_handler(const CU_pTest pTest,
   size_t szTemp_len = 0;
   size_t cur_len = 0;
   CU_pFailureRecord pTempFailure = pFailure;
-  const char *pPackageName = CU_automated_package_name_get();
-
-  CU_UNREFERENCED_PARAMETER(pSuite);  /* pSuite is not used except in assertion */
 
   assert(NULL != pTest);
   assert(NULL != pTest->pName);
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);
+
+  if (bJUnitXmlOutput)
+    return;
+
   assert(NULL != f_pTestResultFile);
 
   if (NULL != pTempFailure) {
-
-    if(NULL != pTempFailure) {
-      if (bJUnitXmlOutput == CU_TRUE) {
-        szTemp = (char *)CU_MALLOC(DEFAULT_SZTMP_BUFIZE);
-        assert((NULL != pTempFailure->pSuite) && (pTempFailure->pSuite == pSuite));
-        assert((NULL != pTempFailure->pTest) && (pTempFailure->pTest == pTest));
-
-        if (NULL != pTempFailure->strCondition) {
-          CU_translate_special_characters(pTempFailure->strCondition, szTemp, DEFAULT_SZTMP_BUFIZE);
-        }
-        else {
-          szTemp[0] = '\0';
-        }
-
-        fprintf(f_pTestResultFile, "        <testcase classname=\"%s.%s\" name=\"%s\" time=\"0\">\n",
-                pPackageName,
-                pSuite->pName,
-                (NULL != pTest->pName) ? pTest->pName : "");
-        fprintf(f_pTestResultFile, "            <failure message=\"%s\" type=\"Failure\">\n", szTemp);
-        CU_FREE_ZERO(szTemp);
-      } /* if */
-    }
-
     while (NULL != pTempFailure) {
 
       assert((NULL != pTempFailure->pSuite) && (pTempFailure->pSuite == pSuite));
@@ -442,27 +403,15 @@ static void automated_test_complete_message_handler(const CU_pTest pTest,
       } /* if */
       pTempFailure = pTempFailure->pNext;
     } /* while */
-
-    if (bJUnitXmlOutput == CU_TRUE) {
-      fprintf(f_pTestResultFile, "            </failure>\n");
-      fprintf(f_pTestResultFile, "        </testcase>\n");
-    } /* if */
   }
   else {
-    if (bJUnitXmlOutput == CU_TRUE) {
-      fprintf(f_pTestResultFile,  "        <testcase classname=\"%s.%s\" name=\"%s\" time=\"0\"/>\n",
-              pPackageName,
-              pSuite->pName,
-              (NULL != pTest->pName) ? pTest->pName : "");
-    } else {
-      fprintf(f_pTestResultFile,
-              "        <CUNIT_RUN_TEST_RECORD> \n"
-              "          <CUNIT_RUN_TEST_SUCCESS> \n"
-              "            <TEST_NAME> %s </TEST_NAME> \n"
-              "          </CUNIT_RUN_TEST_SUCCESS> \n"
-              "        </CUNIT_RUN_TEST_RECORD> \n",
-              pTest->pName);
-    }
+    fprintf(f_pTestResultFile,
+            "        <CUNIT_RUN_TEST_RECORD> \n"
+            "          <CUNIT_RUN_TEST_SUCCESS> \n"
+            "            <TEST_NAME> %s </TEST_NAME> \n"
+            "          </CUNIT_RUN_TEST_SUCCESS> \n"
+            "        </CUNIT_RUN_TEST_RECORD> \n",
+            pTest->pName);
   }
 
   if (NULL != szTemp) {
@@ -471,19 +420,8 @@ static void automated_test_complete_message_handler(const CU_pTest pTest,
 }
 
 static void automated_suite_skipped_message_handler(const CU_pSuite pSuite) {
-    if (bJUnitXmlOutput == CU_TRUE) {
-        char *szTempName = (char *)CU_MALLOC((CU_translated_strlen(pSuite->pName) + 1));
-        assert (szTempName);
-        CU_translate_special_characters(pSuite->pName, szTempName, (CU_translated_strlen(pSuite->pName) + 1));
-
-        fprintf(f_pTestResultFile,
-                "  <testsuite errors=\"%d\" failures=\"%d\" tests=\"%d\" name=\"%s\" skipped=\"true\"> \n",
-                0 , /* Errors */
-                pSuite->uiNumberOfTestsFailed, /* Failures */
-                pSuite->uiNumberOfTests, /* Tests */
-                (NULL != szTempName) ? szTempName : ""); /* Name */
-        CU_FREE(szTempName);
-    }
+  assert(pSuite);
+  if (bJUnitXmlOutput) return;
 }
 
 /** Handler function called when a test is being skipped.
@@ -493,30 +431,23 @@ static void automated_suite_skipped_message_handler(const CU_pSuite pSuite) {
 static void automated_test_skipped_message_handler(const CU_pTest pTest,
                                                    const CU_pSuite pSuite)
 {
-  const char *pPackageName = CU_automated_package_name_get();
-
-  CU_UNREFERENCED_PARAMETER(pSuite);  /* pSuite is not used except in assertion */
-
   assert(NULL != pTest);
   assert(NULL != pTest->pName);
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);
+  if (bJUnitXmlOutput) {
+    return;
+  }
+
   assert(NULL != f_pTestResultFile);
 
-  if (bJUnitXmlOutput == CU_TRUE) {
-    fprintf(f_pTestResultFile,  "        <testcase classname=\"%s.%s\" name=\"%s\" time=\"0\"><skipped/></testcase>\n",
-            pPackageName,
-            pSuite->pName,
-            (NULL != pTest->pName) ? pTest->pName : "");
-  } else {
-    fprintf(f_pTestResultFile,
-            "        <CUNIT_RUN_TEST_RECORD> \n"
-            "          <CUNIT_RUN_TEST_SKIPPED> \n"
-            "            <TEST_NAME> %s </TEST_NAME> \n"
-            "          </CUNIT_RUN_TEST_SKIPPED> \n"
-            "        </CUNIT_RUN_TEST_RECORD> \n",
-            pTest->pName);
-  }
+  fprintf(f_pTestResultFile,
+          "        <CUNIT_RUN_TEST_RECORD> \n"
+          "          <CUNIT_RUN_TEST_SKIPPED> \n"
+          "            <TEST_NAME> %s </TEST_NAME> \n"
+          "          </CUNIT_RUN_TEST_SKIPPED> \n"
+          "        </CUNIT_RUN_TEST_RECORD> \n",
+          pTest->pName);
 }
 
 /*------------------------------------------------------------------------*/
@@ -532,6 +463,12 @@ static void automated_all_tests_complete_message_handler(const CU_pFailureRecord
 
   assert(NULL != pRegistry);
   assert(NULL != pRunSummary);
+
+  if (bJUnitXmlOutput) {
+    CU_automated_finish_junit(CU_automated_get_junit_filename());
+    return;
+  }
+
   assert(NULL != f_pTestResultFile);
 
   if ((NULL != f_pRunningSuite) && (CU_TRUE == f_bWriting_CUNIT_RUN_SUITE)) {
@@ -609,19 +546,16 @@ static void automated_suite_init_failure_message_handler(const CU_pSuite pSuite)
 {
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);
+
+  if (bJUnitXmlOutput) return;
+
   assert(NULL != f_pTestResultFile);
 
   if (CU_TRUE == f_bWriting_CUNIT_RUN_SUITE) {
-    if (bJUnitXmlOutput == CU_TRUE) {
-      f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
-      fprintf(f_pTestResultFile,
-              "    </testsuite>\n");
-    } else {
-      fprintf(f_pTestResultFile,
-              "      </CUNIT_RUN_SUITE_SUCCESS> \n"
-              "    </CUNIT_RUN_SUITE> \n");
-      f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
-    }
+    fprintf(f_pTestResultFile,
+            "      </CUNIT_RUN_SUITE_SUCCESS> \n"
+            "    </CUNIT_RUN_SUITE> \n");
+    f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
   }
 
   if (bJUnitXmlOutput == CU_FALSE) {
@@ -645,45 +579,27 @@ static void automated_suite_cleanup_failure_message_handler(const CU_pSuite pSui
 {
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);
+
+  if (bJUnitXmlOutput) return;
+
   assert(NULL != f_pTestResultFile);
 
   if (CU_TRUE == f_bWriting_CUNIT_RUN_SUITE) {
-    if (bJUnitXmlOutput == CU_TRUE) {
-      f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
-      fprintf(f_pTestResultFile,
-              "    </testsuite>\n");
-    } else {
-      fprintf(f_pTestResultFile,
-              "      </CUNIT_RUN_SUITE_SUCCESS> \n"
-              "    </CUNIT_RUN_SUITE> \n");
-      f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
-    }
+    fprintf(f_pTestResultFile,
+            "      </CUNIT_RUN_SUITE_SUCCESS> \n"
+            "    </CUNIT_RUN_SUITE> \n");
+    f_bWriting_CUNIT_RUN_SUITE = CU_FALSE;
   }
 
-  if (bJUnitXmlOutput == CU_TRUE) {
-    fprintf(f_pTestResultFile,
-            "    <testsuite name=\"Suite Cleanup\"> \n"
-            "        <testcase name=\"%s\" result=\"failure\"> \n"
-            "            <error> \"Cleanup of suite failed.\" </error> \n"
-            "          <variation name=\"error\"> \n"
-            "            <severity>fail</severity> \n"
-            "            <description> \"Cleanup of suite failed.\" </description> \n"
-            "            <resource> SuiteCleanup </resource> \n"
-            "          </variation> \n"
-            "       </testcase> \n"
-            "    </testsuite>\n",
-            (NULL != pSuite->pName) ? pSuite->pName : "");
-  } else {
-    fprintf(f_pTestResultFile,
-            "    <CUNIT_RUN_SUITE> \n"
-            "      <CUNIT_RUN_SUITE_FAILURE> \n"
-            "        <SUITE_NAME> %s </SUITE_NAME> \n"
-            "        <FAILURE_REASON> %s </FAILURE_REASON> \n"
-            "      </CUNIT_RUN_SUITE_FAILURE> \n"
-            "    </CUNIT_RUN_SUITE>  \n",
-            pSuite->pName,
-            _("Suite Cleanup Failed"));
-  }
+  fprintf(f_pTestResultFile,
+          "    <CUNIT_RUN_SUITE> \n"
+          "      <CUNIT_RUN_SUITE_FAILURE> \n"
+          "        <SUITE_NAME> %s </SUITE_NAME> \n"
+          "        <FAILURE_REASON> %s </FAILURE_REASON> \n"
+          "      </CUNIT_RUN_SUITE_FAILURE> \n"
+          "    </CUNIT_RUN_SUITE>  \n",
+          pSuite->pName,
+          _("Suite Cleanup Failed"));
 }
 
 /*------------------------------------------------------------------------*/
@@ -693,22 +609,20 @@ static void automated_suite_cleanup_failure_message_handler(const CU_pSuite pSui
 static CU_ErrorCode uninitialize_result_file(void) {
     char *szTime;
     time_t tTime = 0;
+  if (bJUnitXmlOutput) { return CU_get_error(); }
 
-    assert(NULL != f_pTestResultFile);
+  assert(NULL != f_pTestResultFile);
 
-    CU_set_error(CUE_SUCCESS);
+  CU_set_error(CUE_SUCCESS);
 
-    time(&tTime);
-    szTime = ctime(&tTime);
+  time(&tTime);
+  szTime = ctime(&tTime);
 
-    if (bJUnitXmlOutput == CU_TRUE) {
-        fprintf(f_pTestResultFile, "</testsuite></testsuites>");
-    } else {
-        fprintf(f_pTestResultFile,
-                "  <CUNIT_FOOTER> %s" CU_VERSION " - %s </CUNIT_FOOTER> \n"
-                "</CUNIT_TEST_RUN_REPORT>", _("File Generated By CUnit v"),
-            (NULL != szTime) ? szTime : "");
-    }
+  fprintf(f_pTestResultFile,
+          "  <CUNIT_FOOTER> %s" CU_VERSION " - %s </CUNIT_FOOTER> \n"
+          "</CUNIT_TEST_RUN_REPORT>", _("File Generated By CUnit v"),
+          (NULL != szTime) ? szTime : "");
+
   if (0 != fclose(f_pTestResultFile)) {
     CU_set_error(CUE_FCLOSE_FAILED);
   }

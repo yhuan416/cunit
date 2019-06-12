@@ -800,10 +800,10 @@ static void insert_suite(CU_pTestRegistry pRegistry, CU_pSuite pSuite)
 static CU_pTest create_test(const char* strName, CU_TestFunc pTestFunc)
 {
   CU_pTest pRetValue = (CU_pTest)CU_MALLOC(sizeof(CU_Test));
-
   assert(NULL != strName);
 
   if (NULL != pRetValue) {
+    memset(pRetValue, 0, sizeof(*pRetValue));
     pRetValue->pName = (char *)CU_MALLOC(strlen(strName)+1);
     if (NULL != pRetValue->pName) {
       strcpy(pRetValue->pName, strName);

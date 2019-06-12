@@ -66,7 +66,7 @@ cmake-pkgexample-ubuntu-18.04:
   script:
     - find . -type f -name "*.tar.gz"
     - mkdir -p packages/cunit
-    - tar -vxf build-cunit-ubuntu-18.04/cunit-3.0.*.tar.gz --strip-components=1 -C packages/cunit
+    - tar -vxf build-cunit-ubuntu-18.04/cunit-3.1.*.tar.gz --strip-components=1 -C packages/cunit
     - cd CMakeExamples/CMakeFindPackage
     - mkdir bld
     - cd bld
@@ -76,32 +76,20 @@ cmake-pkgexample-ubuntu-18.04:
   dependencies:
     - cunit-ubuntu-18.04
 
-.vs2015: &vs2015
+cunit-win2019-vs2015:
+  stage: build
+  image: registry.gitlab.com/cunity/windows-cmake-docker/win2019-vs2015:master
+  tags:
+    - cunity-windows-2019-docker
   script:
-    - mkdir bld
-    - cd bld
+    - mkdir build-win2019-vs2015
+    - cd build-win2019-vs2015
     - cmake -G "Visual Studio 14 2015 Win64" .. || exit /b
     - cmake --build . --config Release || exit /b
     - ctest -C Release || exit \b
   artifacts:
     paths:
-      - bld/Examples/CI/*-Results.*
-
-cunit-win1803-vs2015:
-  stage: build
-  when: manual
-  image: cunity/windows-1803-cmake:latest
-  tags:
-    - cunity-windows-1803-docker
-  <<: *vs2015
-
-cunit-win2019-vs2015:
-  stage: build
-  when: manual
-  image: registry.gitlab.com/cunity/windows-cmake-docker/win2019-vs2015:master
-  tags:
-    - cunity-windows-2019-docker
-  <<: *vs2015
+      - build-win2019-vs2019/Examples/CI/*-Results.*
 
 results:
   stage: results

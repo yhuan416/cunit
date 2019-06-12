@@ -16,6 +16,10 @@ CU_EXPORT CU_ErrorCode CU_initialize_junit_result_file(void);
 
 CU_EXPORT const char *CU_automated_get_junit_filename(void);
 
+CU_EXPORT void CU_automated_render_junit(char** outstr, const char* filename);
+
+CU_EXPORT void CU_automated_finish_junit(const char* filename);
+
 #ifdef __cplusplus
 }
 #endif

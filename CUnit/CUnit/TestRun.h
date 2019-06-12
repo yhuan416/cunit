@@ -371,6 +371,13 @@ CU_EXPORT CU_pFailureRecord CU_get_failure_list(void);
  *  when the client initiates a run using CU_run_all_tests(), CU_run_suite(),
  *  or CU_run_test().
  */
+
+CU_EXPORT CU_pFailureRecord CU_iterate_test_failures(CU_pTest test, CU_pFailureRecord previous);
+/**<
+ *  Iterate over the recorded failure records of a given test
+ * @return
+ */
+
 CU_EXPORT CU_pRunSummary CU_get_run_summary(void);
 /**<
  *  Retrieves the entire run summary for the last test run (reset each run).
@@ -406,6 +413,16 @@ CU_EXPORT void CU_print_run_results(FILE *file);
  *  file may not be NULL (checked by assertion).
  *
  *  @param file Pointer to stream to receive the printed summary (non-NULL).
+ */
+
+CU_EXPORT double CU_get_test_duration(CU_pTest pTest);
+/**<
+ * @return Get the number of seconds this test took to execute.
+ */
+
+CU_EXPORT double CU_get_suite_duration(CU_pSuite pSuite);
+/**<
+ * @return Get the number of seconds this test took to execute.
  */
 
 /*--------------------------------------------------------------------

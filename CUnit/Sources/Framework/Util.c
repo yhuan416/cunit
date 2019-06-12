@@ -252,12 +252,24 @@ size_t CU_number_width(int number)
 	return (strlen(buf));
 }
 
+#ifdef WIN32
+static char _exename_buf[_MAX_PATH];
+#endif
+
 const char* CU_get_basename(const char* path)
 {
   size_t path_len;
   size_t i;
   assert(path && "expected a nul terminated path string");
   path_len = strlen(path);
+
+#ifdef WIN32
+  (void) i;
+  /* use _splitpath to strip the file extension */
+  assert(strlen(path) < _MAX_PATH);
+  _splitpath(path, NULL, NULL, _exename_buf, NULL);
+  return _exename_buf;
+#else
   /* start at the end and find the first path character (/ or \) */
   for (i = path_len - 1; path_len ; i--) {
     switch(path[i]) {
@@ -273,6 +285,7 @@ const char* CU_get_basename(const char* path)
 
   /* there were not path components at all, probably this was on PATH */
   return path;
+#endif
 }
 
 /** @} */
