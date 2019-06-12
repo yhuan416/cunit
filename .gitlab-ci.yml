@@ -89,7 +89,7 @@ cunit-win2019-vs2015:
     - ctest -C Release || exit \b
   artifacts:
     paths:
-      - build-win2019-vs2019/Examples/CI/*-Results.*
+      - build-win2019-vs2019\\Examples\\CI\\*-Results.*
 
 results:
   stage: results
