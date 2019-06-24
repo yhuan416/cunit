@@ -40,6 +40,14 @@ CI build and test.  The _master_ branch will focus on CMake as it's sole
 build system and will gradually remove the old Jam/Make configurations as
 more of the project gets included in the CMake builds.
 
+On gitlab.com, CUnit is regularly built on the following platforms:
+
+  * Ubuntu AMD64 18.04
+  * Ubuntu AMD64 17.10
+  * Ubuntu Power9 19.04
+  * Solaris AMD64 11 
+  * Windows VS2015
+
 ## Building CUnit
 
 CUnit now builds using CMake (http://www.cmake.org) as such, it should build
