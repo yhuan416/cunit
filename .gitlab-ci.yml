@@ -29,6 +29,11 @@ stages:
     reports:
       junit: build-*/Examples/CI/*-Results.xml
 
+cunit-ubuntu-19.04-power9:
+  <<: *cunit-build
+  tags:
+    - ubuntu-19.04-power9
+
 cunit-ubuntu-18.04:
   <<: *cunit-build
   stage: build
