@@ -13,7 +13,7 @@ stages:
     - git clean -f -d -x
     - mkdir build-${CI_JOB_NAME}
     - cd build-${CI_JOB_NAME}
-    - cmake ..
+    - cmake -G "Unix Makefiles" ..
     - cmake --build . -- -j2
     - ctest --output-on-failure    
     - ./Examples/CI/cicd-pass-plain
@@ -45,11 +45,23 @@ cunit-ubuntu-17.10:
   stage: build
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-17.10:master
 
-cunit-solaris-amd64:
+cunit-solaris-amd64-gcc8:
   <<: *cunit-build
+  variables:
+    CC: /usr/bin/gcc
+    CXX: /usr/bin/g++
   stage: build
   tags:
-    - solaris-11-amd64
+    - solaris-11-amd64-gcc8
+
+cunit-solaris-amd64-sstudio123:
+  <<: *cunit-build
+  variables:
+    CC: /opt/solarisstudio12.3/bin/c99
+    CXX: /opt/solarisstudio12.3/bin/CC
+  stage: build
+  tags:
+    - solaris-11-amd64-sstudio123
 
 cmake-direxample-ubuntu-18.04:
   stage: test
