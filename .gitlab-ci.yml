@@ -102,12 +102,12 @@ cunit-win2019-vs2015:
   script:
     - mkdir build-win2019-vs2015
     - cd build-win2019-vs2015
-    - cmake -G "Visual Studio 14 2015 Win64" .. || exit /b
-    - cmake --build . --config Release || exit /b
-    - ctest -C Release || exit \b
+    - cmake -G "Visual Studio 14 2015 Win64" .. 
+    - cmake --build . --config Release 
+    - ctest -C Release
   artifacts:
     paths:
-      - build-win2019-vs2019/Examples/CI/*-Results.*
+      - build-win2019-vs2019\\Examples\\CI\\*-Results.*
 
 results:
   stage: results
