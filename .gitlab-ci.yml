@@ -70,6 +70,7 @@ cunit-solaris-amd64-sstudio123:
 
 cmake-direxample-ubuntu-18.04:
   stage: test
+  needs: ["cunit-ubuntu-18.04"]
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
   script:
   - cd CMakeExamples/CMakeSubmodule
@@ -85,6 +86,7 @@ cmake-direxample-ubuntu-18.04:
 
 cmake-pkgexample-ubuntu-18.04:
   stage: test
+  needs: ["cunit-ubuntu-18.04"]
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
   script:
     - find . -type f -name "*.tar.gz"
