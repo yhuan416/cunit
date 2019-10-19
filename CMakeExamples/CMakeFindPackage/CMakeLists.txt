@@ -1,3 +1,4 @@
+project(CUnitExamplePackage C)
 cmake_minimum_required(VERSION 3.5)
 
 # uncomment to test pre-building cunit
