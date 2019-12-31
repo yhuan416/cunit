@@ -43,14 +43,14 @@
  @{
 */
 
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
 #include <string.h>
-
-#include "CUnit/CUnit.h"
-#include "CUnit/TestDB.h"
 #include "CUnit/Util.h"
 
 

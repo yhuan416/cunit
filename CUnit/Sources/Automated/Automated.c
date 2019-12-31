@@ -48,12 +48,13 @@
  @{
 */
 
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
 #include <assert.h>
 #include <string.h>
-#include <limits.h>
 #include <time.h>
 
 #include "CUnit/MessageHandlers.h"
@@ -66,7 +67,6 @@
 #include "CUnit/CUnit_intl.h"
 
 #define MAX_FILENAME_LENGTH		1025
-#define DEFAULT_SZTMP_BUFIZE      2048
 
 /*=================================================================
  *  Global / Static data definitions

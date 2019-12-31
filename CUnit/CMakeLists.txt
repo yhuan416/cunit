@@ -1,17 +1,19 @@
 project(CUnit C)
 
 set(CUNIT_VERSION_MAJOR 3)
-set(CUNIT_VERSION_MINOR 1)
-set(CUNIT_VERSION_PATCH 2)
+set(CUNIT_VERSION_MINOR 2)
+set(CUNIT_VERSION_PATCH 1)
 set(CUNIT_VERSION "${CUNIT_VERSION_MAJOR}.${CUNIT_VERSION_MINOR}.${CUNIT_VERSION_PATCH}")
 set(CUNIT_RELEASE cunity)
 
 
 cmake_minimum_required (VERSION 3.2)
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Werror=strict-prototypes")
-endif(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  # repeat here so consumers get more warnings
+  set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Werror=strict-prototypes")
+endif()
+
 
 if (MSVC)
   # force assert() to work on release mode windows

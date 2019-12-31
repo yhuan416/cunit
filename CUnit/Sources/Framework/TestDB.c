@@ -56,6 +56,10 @@
  @{
 */
 
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -67,7 +71,7 @@
 #include "CUnit/TestDB.h"
 #include "CUnit/TestRun.h"
 #include "CUnit/Util.h"
-#include "CUnit/CUnit_intl.h"
+
 
 /*=================================================================
  *  Global/Static Definitions

@@ -113,8 +113,19 @@ static void setup_handlers(void) {
     CCU_MessageHandler_Add(handler.type, &handler);
 }
 
+static char ** cunit_main_argv = NULL;
+static int cunit_main_argc = 0;
+
+CU_EXPORT void CU_CI_args(int *argc, char*** argv) {
+  *argc = cunit_main_argc;
+  *argv = cunit_main_argv;
+}
+
 CU_EXPORT int CU_CI_main(int argc, char** argv) {
     int ret = -1;
+    cunit_main_argc = argc;
+    cunit_main_argv = argv;
+
     if (argc > 0) {
         fprintf(stdout, _("Starting CUnit test:\n %s\n"), argv[0]);
         CU_set_output_filename(CU_get_basename(argv[0]));
@@ -138,7 +149,7 @@ CU_EXPORT int CU_CI_main(int argc, char** argv) {
     CCU_basic_add_handlers();
     CU_run_all_tests();
 
-    ret = CU_get_number_of_failures();
+    ret = (int) CU_get_number_of_failures();
 
     CU_cleanup_registry();
 

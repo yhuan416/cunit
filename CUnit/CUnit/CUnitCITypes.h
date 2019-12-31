@@ -42,6 +42,13 @@ extern "C" {
 #endif
 
 /**
+ * Obtain the command line arguments and count that was passed to CU_CI_main()
+ * @param argc
+ * @param argv
+ */
+CU_EXPORT void CU_CI_args(int *argc, char*** argv);
+
+/**
  * Main Entry point to CI mode of CUnit
  * @param argc command line args count
  * @param argv vector of command line args

@@ -96,7 +96,7 @@ void testFREAD(void)
  * Returns a CUE_SUCCESS on successful running, another
  * CUnit error code on failure.
  */
-int main()
+int main(int argc, char** argv)
 {
    CU_pSuite pSuite = NULL;
 

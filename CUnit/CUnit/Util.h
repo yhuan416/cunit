@@ -48,6 +48,7 @@
 #ifndef CUNIT_UTIL_H_SEEN
 #define CUNIT_UTIL_H_SEEN
 
+#include <stdlib.h>
 #include "CUnit/CUnit.h"
 
 #ifdef __cplusplus

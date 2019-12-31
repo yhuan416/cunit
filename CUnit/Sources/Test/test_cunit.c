@@ -53,10 +53,10 @@ static clock_t      f_start_time;
 static void test_cunit_initialize(void);
 static void test_cunit_report_results(void);
 
-int main()
+int main(int argc, char** argv)
 {
   /* No line buffering. */
-  setbuf(stdout, NULL);
+  setvbuf(stdout, NULL, _IONBF, 0);
 
   test_cunit_initialize();
   fprintf(stdout, "\n%s", _("Testing CUnit internals..."));
