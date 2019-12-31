@@ -1144,7 +1144,7 @@ static void clear_test_events(void)
   f_nTestEvents = 0;
 }
 
-static void suite_start_handler(const CU_pSuite pSuite)
+static void suite_start_handler(CU_pSuite pSuite)
 {
   TEST(CU_is_test_running());
   TEST(pSuite == CU_get_current_suite());
@@ -1459,7 +1459,6 @@ static void assert_msg_handlers_empty(void) {
  */
 static void test_message_handlers(void)
 {
-  int i = 0;
   CU_pSuite pSuite1 = NULL;
   CU_pSuite pSuite2 = NULL;
   CU_pSuite pSuite3 = NULL;
@@ -1467,10 +1466,8 @@ static void test_message_handlers(void)
   CU_pTest  pTest1 = NULL;
   CU_pTest  pTest2 = NULL;
   CU_pTest  pTest3 = NULL;
-  CU_pTest  pTest4 = NULL;
   CU_pTest  pTest5 = NULL;
   CU_pTest  pTest6 = NULL;
-  CU_pTest  pTest7 = NULL;
   pTestEvent pEvent = NULL;
 
   TEST(!CU_is_test_running());
@@ -1486,7 +1483,7 @@ static void test_message_handlers(void)
   pTest3 = CU_add_test(pSuite1, "test3", test_succeed);
 
   pSuite2 = CU_add_suite("suite2", suite_fail, NULL);
-  pTest4 = CU_add_test(pSuite2, "test4", test_succeed); /* should not execute because suite setup fails */
+  CU_add_test(pSuite2, "test4", test_succeed); /* should not execute because suite setup fails */
 
   pSuite3 = CU_add_suite("suite3", suite_succeed, suite_fail);  /* second suite failure */
   pTest5 = CU_add_test(pSuite3, "test5", test_fail); /* second failure */
@@ -1495,8 +1492,7 @@ static void test_message_handlers(void)
 
   pSuite4 = CU_add_suite("suite4", NULL, NULL);
   CU_set_suite_active(pSuite4, CU_FALSE);  /* disabled suite */
-  pTest7 = CU_add_test(pSuite4, "test7", test_fail);  /* should not execute because suite is disabled */
-
+  CU_add_test(pSuite4, "test7", test_fail);  /* should not execute because suite is disabled */
   TEST_FATAL(CUE_SUCCESS == CU_get_error());
 
   /* first run tests without handlers set */
@@ -2223,12 +2219,8 @@ static void test_CU_run_suite(void)
   CU_pTest pTest3 = NULL;
   CU_pTest pTest4 = NULL;
   CU_pTest pTest5 = NULL;
-  CU_pTest pTest6 = NULL;
-  CU_pTest pTest7 = NULL;
   CU_pTest pTest8 = NULL;
   CU_pTest pTest9 = NULL;
-  CU_pTest pTest10 = NULL;
-  CU_pTest pTest11 = NULL;
 
   /* error - NULL suite (CUEA_IGNORE) */
   CU_set_error_action(CUEA_IGNORE);
@@ -2259,16 +2251,16 @@ static void test_CU_run_suite(void)
   pTest4 = CU_add_test(pSuite1, "test4", test_fail);
   pTest5 = CU_add_test(pSuite1, "test5", test_succeed);
   pSuite2 = CU_add_suite("suite1", suite_fail, NULL);   /* duplicate suite name OK */
-  pTest6 = CU_add_test(pSuite2, "test6", test_succeed);
-  pTest7 = CU_add_test(pSuite2, "test7", test_succeed);
+  CU_add_test(pSuite2, "test6", test_succeed);
+  CU_add_test(pSuite2, "test7", test_succeed);
   pSuite3 = CU_add_suite("suite3", NULL, suite_fail);
   pTest8 = CU_add_test(pSuite3, "test8", test_fail);
   pTest9 = CU_add_test(pSuite3, "test8", test_succeed); /* duplicate test name OK */
   pSuite4 = CU_add_suite("suite4", NULL, NULL);
   pSuite5 = CU_add_suite_with_setup_and_teardown("suite5", NULL, NULL, suite_setup, suite_teardown);
-  pTest10 = CU_add_test(pSuite5, "test10", test_succeed_if_setup);
+  CU_add_test(pSuite5, "test10", test_succeed_if_setup);
   pSuite6 = CU_add_suite("suite6", NULL, NULL);
-  pTest11 = CU_add_test(pSuite6, "test11", test_fail_if_not_setup);
+  CU_add_test(pSuite6, "test11", test_fail_if_not_setup);
 
   TEST_FATAL(6 == CU_get_registry()->uiNumberOfSuites);
   TEST_FATAL(11 == CU_get_registry()->uiNumberOfTests);

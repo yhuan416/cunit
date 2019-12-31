@@ -378,7 +378,7 @@ CU_pTest CU_add_test(CU_pSuite pSuite, const char* strName, CU_TestFunc pTestFun
   else if (NULL == strName) {
     error = CUE_NO_TESTNAME;
   }
-   else if(NULL == pTestFunc) {
+  else if (NULL == pTestFunc) {
     error = CUE_NOTEST;
   }
   else {
@@ -1420,16 +1420,6 @@ static void test_get_suite_functions(void)
   CU_pSuite pSuite3 = NULL;
   CU_pSuite pSuite4 = NULL;
   CU_pSuite pSuite5 = NULL;
-  CU_pTest pTest1 = NULL;
-  CU_pTest pTest2 = NULL;
-  CU_pTest pTest3 = NULL;
-  CU_pTest pTest4 = NULL;
-  CU_pTest pTest5 = NULL;
-  CU_pTest pTest6 = NULL;
-  CU_pTest pTest7 = NULL;
-  CU_pTest pTest8 = NULL;
-  CU_pTest pTest9 = NULL;
-  CU_pTest pTest10 = NULL;
 
   /* error condition - registry not initialized */
   CU_cleanup_registry();
@@ -1453,19 +1443,19 @@ static void test_get_suite_functions(void)
   /* register some suites and tests */
   CU_initialize_registry();
   pSuite1 = CU_add_suite("suite1", NULL, NULL);
-  pTest1 = CU_add_test(pSuite1, "test1", test_succeed);
-  pTest2 = CU_add_test(pSuite1, "test2", test_fail);
-  pTest3 = CU_add_test(pSuite1, "test1", test_succeed); /* duplicate test name */
-  pTest4 = CU_add_test(pSuite1, "test4", test_fail);
-  pTest5 = CU_add_test(pSuite1, "test1", test_succeed); /* duplicate test name */
+  CU_add_test(pSuite1, "test1", test_succeed);
+  CU_add_test(pSuite1, "test2", test_fail);
+  CU_add_test(pSuite1, "test1", test_succeed); /* duplicate test name */
+  CU_add_test(pSuite1, "test4", test_fail);
+  CU_add_test(pSuite1, "test1", test_succeed); /* duplicate test name */
   pSuite2 = CU_add_suite("suite2", suite_fail, NULL);
-  pTest6 = CU_add_test(pSuite2, "test6", test_succeed);
-  pTest7 = CU_add_test(pSuite2, "test7", test_succeed);
+  CU_add_test(pSuite2, "test6", test_succeed);
+  CU_add_test(pSuite2, "test7", test_succeed);
   pSuite3 = CU_add_suite("suite1", NULL, NULL);         /* duplicate suite name */
-  pTest8 = CU_add_test(pSuite3, "test8", test_fail);
-  pTest9 = CU_add_test(pSuite3, "test9", test_succeed);
+  CU_add_test(pSuite3, "test8", test_fail);
+  CU_add_test(pSuite3, "test9", test_succeed);
   pSuite4 = CU_add_suite("suite4", NULL, suite_fail);
-  pTest10 = CU_add_test(pSuite4, "test10", test_succeed);
+  CU_add_test(pSuite4, "test10", test_succeed);
 
   /* error condition - invalid parameters */
 
