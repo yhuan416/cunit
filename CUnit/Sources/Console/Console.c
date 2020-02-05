@@ -63,6 +63,9 @@
 #include "CUnit/Console.h"
 #include "CUnit/CUnit_intl.h"
 
+/** Ignore return values in modern gcc */
+#define IGNORE_RETURN(x) if(x){}
+
 /** Console interface status flag. */
 typedef enum
 {
@@ -166,7 +169,7 @@ static void console_registry_level_run(CU_pTestRegistry pRegistry)
                     _("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit"),
                     _("Enter command: "));
     chChoice = toupper(getchar());
-    fgets(szTemp, 256, stdin);      /* flush any chars out of the read buffer */
+    IGNORE_RETURN(fgets(szTemp, 256, stdin))      /* flush any chars out of the read buffer */
 
     if (chChoice == _("R")[0]) {
       console_run_all_tests(pRegistry);
@@ -245,7 +248,7 @@ static CU_STATUS console_suite_level_run(CU_pSuite pSuite)
                     _("(R)un (S)elect (L)ist (A)ctivate (F)ailures (U)p (O)ptions (H)elp (Q)uit"),
                     _("Enter command: "));
     chChoice = toupper(getchar());
-    fgets(szTemp, 256, stdin);      /* flush any chars out of the read buffer */
+    IGNORE_RETURN(fgets(szTemp, 256, stdin))      /* flush any chars out of the read buffer */
 
     if (chChoice == _("R")[0]) {
       console_run_suite(pSuite);
@@ -324,7 +327,7 @@ static CU_STATUS console_set_options_run(void)
     fprintf(stdout, "%s",
                     _("Enter number of option to change : "));
     chChoice = getchar();
-    fgets(szTemp, 256, stdin);      /* flush any chars out of the read buffer */
+    IGNORE_RETURN(fgets(szTemp, 256, stdin))      /* flush any chars out of the read buffer */
 
     switch (tolower(chChoice)) {
       case '1':
@@ -422,7 +425,7 @@ static CU_ErrorCode select_test(CU_pSuite pSuite, CU_pTest* ppTest)
     fprintf(stdout, "\n");
     fprintf(stdout, _("Enter number of test to select (1-%u) : "),
                     pSuite->uiNumberOfTests);
-    fgets(buffer, 100, stdin);
+    IGNORE_RETURN(fgets(buffer, 100, stdin))
 
     *ppTest = CU_get_test_by_index(atol(buffer), pSuite);
   }
@@ -461,7 +464,7 @@ static CU_ErrorCode select_suite(CU_pTestRegistry pRegistry, CU_pSuite* ppSuite)
     fprintf(stdout, "\n");
     fprintf(stdout, _("Enter number of suite to select (1-%u) : "),
                     pRegistry->uiNumberOfSuites);
-    fgets(buffer, 100, stdin);
+    IGNORE_RETURN(fgets(buffer, 100, stdin))
 
     *ppSuite = CU_get_suite_by_index(atol(buffer), pRegistry);
   }
