@@ -35,6 +35,9 @@ cunit-ubuntu-19.04-power9:
   tags:
     - ubuntu-19.04-power9
   when: manual
+  only:
+    variables:
+      - $GITLAB_LINUX_POWER9
 
 cunit-ubuntu-18.04:
   <<: *cunit-build
@@ -56,6 +59,9 @@ cunit-solaris-amd64-gcc8:
     - solaris-11-amd64-gcc8
   except:
     - schedules
+  only:
+    variables:
+      - $GITLAB_SOLARIS
 
 cunit-solaris-amd64-sstudio123:
   <<: *cunit-build
@@ -67,6 +73,9 @@ cunit-solaris-amd64-sstudio123:
     - solaris-11-amd64-sstudio123
   except:
     - schedules
+  only:
+    variables:
+      - $GITLAB_SOLARIS
 
 cmake-direxample-ubuntu-18.04:
   stage: test
@@ -117,6 +126,9 @@ cunit-win2019-vs2015:
       - build-win2019-vs2015\\Examples\\CI\\*-Results.*
   except: 
     - schedules
+  only:
+    variables:
+      - $GITLAB_WIN2019
 
 results:
   stage: results
