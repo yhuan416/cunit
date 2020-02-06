@@ -31,18 +31,19 @@
 #include "CUnit/AutomatedJUnitXml.h"
 #include "CUnit/TestDB.h"
 #include "CUnit/Util.h"
+#include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 
-#define _DEFAULT_REPORT_SIZE 16384
+#define _DEFAULT_REPORT_SIZE 10
 #define _REPORT_REALLOC_SIZE 8192
 
 
 /* crude dynamic string buffer */
 typedef struct {
     char *buf;
-    unsigned end;
+    unsigned end; /* the offset in buf of the nul terminator */
     size_t size;
 } cu_dstr;
 
@@ -52,18 +53,19 @@ static void _dstr_init(cu_dstr *dst) {
   memset(dst, 0, sizeof(*dst));
   dst->buf = (char*) malloc(_DEFAULT_REPORT_SIZE);
   assert(dst->buf && "dynamic string buffer allocation failed");
+  memset(dst->buf, 0, _DEFAULT_REPORT_SIZE);
   dst->end = 0;
   dst->size = _DEFAULT_REPORT_SIZE;
 }
 
 /* make sure there is enough space left to add count bytes */
 static void _dstr_ensure(cu_dstr *dst, size_t count) {
-  size_t newsize;
+  size_t newsize = 0;
   if (!dst->buf) {
     _dstr_init(dst);
   }
   count++;
-  if (dst->end + count > dst->size) {
+  if (dst->end + count >= dst->size) {
     if (count < _REPORT_REALLOC_SIZE) {
       count = _REPORT_REALLOC_SIZE;
     }
@@ -107,16 +109,21 @@ static char* _dstr_release(cu_dstr *dst) {
   return retval;
 }
 
-
-#define _dstr_putf(_d, ...) \
-do {  \
-  cu_dstr *d = _d; \
-  size_t remain = d->size - d->end; \
-  int n = snprintf(d->buf + d->end, remain, ##__VA_ARGS__); \
-  if ( n < remain) _dstr_ensure(d, 1 + n); \
-  n = snprintf(d->buf + d->end, remain, ##__VA_ARGS__); \
-  d->end = d->end + n; \
-} while (0)
+static int _dstr_putf(cu_dstr *dst, const char* format, ...) {
+  va_list args;
+  va_list args_copy;
+  char tmp_buf[2];
+  int need = 0;
+  int rv;
+  va_start(args, format);
+  va_copy(args_copy, args);
+  need = vsnprintf(tmp_buf, 2, format, args);
+  _dstr_ensure(dst, need + 1);
+  rv = vsnprintf(dst->buf + dst->end, dst->size - dst->end, format, args_copy);
+  dst->end = dst->end + need;
+  va_end(args);
+  return rv;
+}
 
 
 static char* _escape_string(const char* instr) {
