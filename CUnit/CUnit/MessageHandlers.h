@@ -24,6 +24,8 @@ typedef enum CU_MessageType
     CUMSG_TEST_TEARDOWN_FAILED,  /**< test teardown has failed */
     CUMSG_ALL_COMPLETED,         /**< all suites finished */
     CUMSG_SUITE_SKIPPED,         /**< test suite was skipped during suite setup */
+    CUMSG_BEFORE_CU_ASSERT,      /**< about to test an assertion */
+    CUMSG_AFTER_CU_ASSERT,      /**< after testing an assertion */
     CUMSG_MAX
 } CCU_MessageType;
 
@@ -38,6 +40,8 @@ typedef union CU_MessageHandlerFunction {
     CU_TestSkippedMessageHandler         test_skipped;
     CU_AllTestsCompleteMessageHandler    all_completed;
     CU_SuiteSkippedMessageHandler        suite_skipped;
+    CU_BeforeAfterAssertionMessageHandler     before_cu_assert;
+    CU_BeforeAfterAssertionMessageHandler     after_cu_assert;
 } CCU_MessageHandlerFunction;
 
 /**
@@ -58,6 +62,13 @@ typedef struct CCU_MessageHandler {
  * @param handler
  */
 void CCU_MessageHandler_Add(CCU_MessageType type, const CCU_MessageHandler *handler);
+
+/**
+ * Insert a hander at the start of the approrprate handler list.
+ * @param type
+ * @param handler
+ */
+void CCU_MessageHandler_Insert(CCU_MessageType type, const CCU_MessageHandler *handler);
 
 /**
  * Clear all the message handlers for the given event type.

@@ -759,6 +759,15 @@ void CU_automated_enable_junit_xml(CU_BOOL bFlag)
 }
 /** @} */
 
+/**
+ * Return CU_TRUE if junit output is enabled
+ * @return
+ */
+CU_EXPORT CU_BOOL CU_automated_get_junit_xml_enabled(void)
+{
+  return bJUnitXmlOutput;
+}
+
 /*------------------------------------------------------------------------*/
 /** Set tests suites package name
  */

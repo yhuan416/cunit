@@ -24,6 +24,7 @@
  */
 
 
+
 #include "assert.h"
 
 #include "CUnit/Automated.h"
@@ -33,6 +34,7 @@
 #include "CUnit/Util.h"
 #include "CUnit/CUnit_intl.h"
 #include "CUnit/CUnitCITypes.h"
+#include "CUnit/IOCapture.h"
 
 #if defined(_WIN32) || defined(WIN32)
 #include <direct.h>
@@ -111,6 +113,8 @@ static void setup_handlers(void) {
     handler.type = CUMSG_TEST_SKIPPED;
     handler.func.test_skipped = cu_ci_test_skipped;
     CCU_MessageHandler_Add(handler.type, &handler);
+
+    CUnit_IOCapture_enable();
 }
 
 static char ** cunit_main_argv = NULL;

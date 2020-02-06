@@ -88,6 +88,20 @@ void CCU_MessageHandler_Add(CCU_MessageType type, const CCU_MessageHandler *hand
     }
 }
 
+void CCU_MessageHandler_Insert(CCU_MessageType type, const CCU_MessageHandler *handler)
+{
+    CCU_MessageHandler *new = clone_MessageHandler(handler);
+    new->type = type;
+
+    if (handlers[type]) {
+        new->next = handlers[type];
+        new->tail = handlers[type]->tail;
+        handlers[type]->prev = new;
+    }
+    handlers[type] = new;
+}
+
+
 void CCU_MessageHandler_Clear(CCU_MessageType type)
 {
     CCU_MessageHandler *head = handlers[type];
@@ -138,6 +152,12 @@ static void _run_MessageHandler(CCU_MessageHandler *handler,
             break;
         case CUMSG_SUITE_SKIPPED:
             handler->func.suite_skipped(pSuite);
+            break;
+      case CUMSG_BEFORE_CU_ASSERT:
+            handler->func.before_cu_assert(pTest, pSuite);
+            break;
+      case CUMSG_AFTER_CU_ASSERT:
+            handler->func.after_cu_assert(pTest, pSuite);
             break;
         default:
             break;

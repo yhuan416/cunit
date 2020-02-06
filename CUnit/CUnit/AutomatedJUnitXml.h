@@ -12,6 +12,8 @@ extern "C" {
 
 CU_EXPORT void CU_automated_enable_junit_xml(CU_BOOL bFlag);
 
+CU_EXPORT CU_BOOL CU_automated_get_junit_xml_enabled(void);
+
 CU_EXPORT CU_ErrorCode CU_initialize_junit_result_file(void);
 
 CU_EXPORT const char *CU_automated_get_junit_filename(void);

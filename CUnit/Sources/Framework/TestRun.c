@@ -147,6 +147,9 @@ CU_BOOL CU_assertImplementation(CU_BOOL bValue,
   assert(NULL != f_pCurSuite);
 
   ++f_run_summary.nAsserts;
+
+  CCU_MessageHandler_Run(CUMSG_BEFORE_CU_ASSERT, f_pCurSuite, f_pCurTest, f_failure_list);
+
   if (CU_FALSE == bValue) {
     ++f_run_summary.nAssertsFailed;
     add_failure(&f_failure_list, &f_run_summary, CUF_AssertFailed,

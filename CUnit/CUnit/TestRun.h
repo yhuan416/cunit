@@ -183,6 +183,9 @@ typedef void (*CU_SuiteSkippedMessageHandler)(const CU_pSuite pSuite);
 /**< Message handler called when a suite is skipped during setup.
  */
 
+typedef void (*CU_BeforeAfterAssertionMessageHandler)(const CU_pTest pTest, const CU_pSuite pSuite);
+/**< Message handler called before or after any CU_ASSERT operation */
+
 /*--------------------------------------------------------------------
  * Get/Set functions for Message Handlers
  *--------------------------------------------------------------------*/
