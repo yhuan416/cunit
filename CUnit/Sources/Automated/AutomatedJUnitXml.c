@@ -58,14 +58,16 @@ static void _dstr_init(cu_dstr *dst) {
 
 /* make sure there is enough space left to add count bytes */
 static void _dstr_ensure(cu_dstr *dst, size_t count) {
-  size_t remain;
+  size_t newsize;
   if (!dst->buf) {
     _dstr_init(dst);
   }
-  remain = dst->size - dst->end;
   count++;
-  if (remain < count) {
-    size_t newsize = dst->size + _REPORT_REALLOC_SIZE;
+  if (dst->end + count > dst->size) {
+    if (count < _REPORT_REALLOC_SIZE) {
+      count = _REPORT_REALLOC_SIZE;
+    }
+    newsize = dst->size + count;
     dst->buf = (char*) realloc(dst->buf, newsize);
     assert(dst->buf && "dynamic string buffer realloc failed");
     dst->size = newsize;
@@ -74,7 +76,7 @@ static void _dstr_ensure(cu_dstr *dst, size_t count) {
 
 /* append str to dst */
 static void _dstr_snputs(cu_dstr *dst, const char* str, size_t count) {
-  int i;
+  unsigned i;
   _dstr_ensure(dst, count);
 
   for (i = 0; i < count; i++) {
