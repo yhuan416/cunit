@@ -1,4 +1,4 @@
 void deallocate_memory(ptr, uiLine, szFileName)
 {
-  __coverity_escape__();
+  __coverity_escape__(ptr);
 }
