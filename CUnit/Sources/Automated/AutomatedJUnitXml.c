@@ -117,7 +117,13 @@ static int _dstr_putf(cu_dstr *dst, const char* format, ...) {
   int rv;
   va_start(args, format);
   va_copy(args_copy, args);
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+  need = _vscprintf(format, args);
+#elif
   need = vsnprintf(tmp_buf, 2, format, args);
+#endif
+
   _dstr_ensure(dst, need + 1);
   rv = vsnprintf(dst->buf + dst->end, dst->size - dst->end, format, args_copy);
   dst->end = dst->end + need;
