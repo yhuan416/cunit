@@ -120,7 +120,7 @@ static int _dstr_putf(cu_dstr *dst, const char* format, ...) {
 
 #if defined(_WIN32) || defined(__CYGWIN__)
   need = _vscprintf(format, args);
-#elif
+#else
   need = vsnprintf(tmp_buf, 2, format, args);
 #endif
 
