@@ -149,7 +149,7 @@ CU_EXPORT int CU_CI_main(int argc, char** argv) {
     CCU_basic_add_handlers();
     CU_run_all_tests();
 
-    ret = (int) CU_get_number_of_failures();
+    ret = (int) (CU_get_number_of_failures() + CU_get_number_of_failure_records());
 
     CU_cleanup_registry();
 

@@ -140,6 +140,119 @@ static char* _escape_string(const char* instr) {
   return sztmp;
 }
 
+static int count_suite_init_errors(CU_pSuite pSuite) {
+  return CU_count_test_failures(pSuite->pCleanupFuncTest) + CU_count_test_failures(pSuite->pInitializeFuncTest);
+}
+
+static int count_all_init_errors(CU_pTestRegistry pTestRegistry) {
+  CU_pSuite s = pTestRegistry->pSuite;
+  int n = 0;
+  while (s) {
+    n += count_suite_init_errors(s);
+    s = s->pNext;
+  }
+  return n;
+}
+
+static int count_suite_init_funcs(CU_pSuite pSuite) {
+  int n = 0;
+  if (pSuite) {
+    if (pSuite->pInitializeFuncTest) n++;
+    if (pSuite->pCleanupFuncTest) n++;
+  }
+  return n;
+}
+
+static int count_all_init_funcs(CU_pTestRegistry pTestRegistry) {
+  int n = 0;
+  if (pTestRegistry) {
+    CU_pSuite s = pTestRegistry->pSuite;
+    while (s) {
+      n += count_suite_init_funcs(s);
+      s = s->pNext;
+    }
+  }
+  return n;
+}
+
+static void format_testcase(cu_dstr *dst, const char *esc_name, CU_pSuite suite, CU_pTest test) {
+  char *esc_test_name = _escape_string(test->pName);
+  CU_pFailureRecord failure = NULL;
+  _dstr_putf(dst,
+             "    <testcase classname=\"%s.%s\" name=\"%s\" time=\"%f\">\n",
+             CU_automated_package_name_get(),
+             esc_name,
+             esc_test_name,
+             CU_get_test_duration(test)
+  );
+
+  if (test->fSkipped || suite->fSkipped) {
+    char *skipreason = NULL;
+    if (suite->fSkipped) {
+      if (suite->pSkipReason)
+        skipreason = _escape_string(suite->pSkipReason);
+      _dstr_puts(dst, "      <skipped reason=\"suite skipped\">");
+      _dstr_putf(dst,
+                 "File: %s\n"
+                 "Line: %u\n",
+                 suite->pSkipFile,
+                 suite->uiSkipLine
+      );
+    } else {
+      if (test->pSkipReason)
+        skipreason = _escape_string(test->pSkipReason);
+      _dstr_puts(dst, "      <skipped reason=\"test skipped\">");
+      _dstr_putf(dst,
+                 "File: %s\n"
+                 "Line: %u\n",
+                 test->pSkipFile,
+                 test->uiSkipLine
+      );
+    }
+    if (skipreason)
+      _dstr_puts(dst, skipreason);
+    free(skipreason);
+    _dstr_puts(dst, "      </skipped>\n");
+  }
+
+  while ((failure = CU_iterate_test_failures(test, failure))) {
+    /* add each failure */
+    cu_dstr failure_msg = {0};
+    char *tmp_failure = NULL;
+    _dstr_init(&failure_msg);
+    assert(failure);
+    switch (failure->type) {
+      case CUF_SuiteCleanupFailed:
+        _dstr_putf(&failure_msg, "%s Suite-wide cleanup failed", suite->pName);
+        break;
+      case CUF_SuiteInitFailed:
+        _dstr_putf(&failure_msg, "%s Suite-wide setup failed", suite->pName);
+        break;
+      case CUF_AssertFailed:
+        _dstr_putf(&failure_msg,
+                   "File: %s\n"
+                   "Line: %u\n"
+                   "Assertion Failed:\n"
+                   "Condition: '%s'\n\n",
+                   failure->strFileName,
+                   failure->uiLineNumber,
+                   failure->strCondition
+        );
+        break;
+      default:
+        break;
+    }
+    tmp_failure = _escape_string(failure_msg.buf);
+    _dstr_putf(dst, "      <failure>%s</failure>\n", tmp_failure);
+    free(tmp_failure);
+    _dstr_reset(&failure_msg);
+  }
+
+  _dstr_puts(dst, "    </testcase>\n");
+  free(esc_test_name);
+
+}
+
 CU_EXPORT void CU_automated_render_junit(char** outstr, const char* filename) {
   assert(outstr && "No destination pointer");
   *outstr = NULL;
@@ -147,14 +260,19 @@ CU_EXPORT void CU_automated_render_junit(char** outstr, const char* filename) {
   CU_pTestRegistry registry = CU_get_registry();
   CU_pSuite suite = registry->pSuite;
   if (summary) {
-    char *esc_name = _escape_string(filename);
     cu_dstr dst = {0};
+    char *esc_name = _escape_string(filename);
+    int all_errors = count_all_init_errors(registry);
+    int all_failures = all_errors + CU_count_all_failures(registry);
+    int all_tests = CU_count_all_tests(registry) + count_all_init_funcs(registry);
+
     _dstr_init(&dst);
     _dstr_puts(&dst, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     _dstr_putf(&dst,
             "<testsuites errors=\"%d\" failures=\"%d\" tests=\"%d\" name=\"%s\" time=\"%f\">\n",
-            0,
-            summary->nTestsFailed, summary->nTestsRun + summary->nTestsSkipped,
+            all_errors,
+            all_failures,
+            all_tests,
             esc_name,
             summary->ElapsedTime
             );
@@ -163,91 +281,30 @@ CU_EXPORT void CU_automated_render_junit(char** outstr, const char* filename) {
     /* iterate through all suites */
     while (suite) {
       CU_pTest test = suite->pTest;
+      int errors = count_suite_init_errors(suite);
+      int test_count = CU_count_suite_tests(suite) + count_suite_init_funcs(suite);
+      int test_failures = errors + CU_count_suite_failures(suite);
       esc_name = _escape_string(suite->pName);
       _dstr_putf(&dst,
-              "  <testsuite errors=\"0\" failures=\"%d\" tests=\"%d\" name=\"%s\" time=\"%f\">\n",
-              suite->uiNumberOfTestsFailed,
-              suite->uiNumberOfTests,
+              "  <testsuite errors=\"%d\" failures=\"%d\" tests=\"%d\" name=\"%s\" time=\"%f\">\n",
+              errors,
+              test_failures,
+              test_count,
               suite->pName,
               CU_get_suite_duration(suite)
               );
 
+      /* record suite setup */
+      if (suite->pInitializeFuncTest) format_testcase(&dst, esc_name, suite, suite->pInitializeFuncTest);
+
       /* iterate through all the tests */
       while (test) {
-        char *esc_test_name = _escape_string(test->pName);
-        _dstr_putf(&dst,
-                   "    <testcase classname=\"%s.%s\" name=\"%s\" time=\"%f\">\n",
-                   CU_automated_package_name_get(),
-                   esc_name,
-                   esc_test_name,
-                   CU_get_test_duration(test)
-        );
-
-
-        if (test->fSkipped || suite->fSkipped) {
-          char *skipreason = NULL;
-          if (suite->fSkipped) {
-            if (suite->pSkipReason)
-              skipreason = _escape_string(suite->pSkipReason);
-            _dstr_puts(&dst, "      <skipped reason=\"suite skipped\">");
-            _dstr_putf(&dst,
-                       "File: %s\n"
-                       "Line: %u\n",
-                       suite->pSkipFile,
-                       suite->uiSkipLine
-            );
-          } else {
-            if (test->pSkipReason)
-              skipreason = _escape_string(test->pSkipReason);
-            _dstr_puts(&dst, "      <skipped reason=\"test skipped\">");
-            _dstr_putf(&dst,
-                       "File: %s\n"
-                       "Line: %u\n",
-                       test->pSkipFile,
-                       test->uiSkipLine
-            );
-          }
-          if (skipreason)
-            _dstr_puts(&dst, skipreason);
-          free(skipreason);
-          _dstr_puts(&dst, "      </skipped>\n");
-        }
-        if (test->uFailedRuns) {
-          cu_dstr failure_msg = {0};
-          char *tmp_failure;
-          CU_pFailureRecord failure = NULL;
-          /* wait, more than one failure?? */
-
-          _dstr_init(&failure_msg);
-          while ((failure = CU_iterate_test_failures(test, failure))) {
-            /* add this failure */
-            assert(failure);
-            switch (failure->type) {
-              case CUF_AssertFailed:
-                _dstr_putf(&failure_msg,
-                        "File: %s\n"
-                        "Line: %u\n"
-                        "Assertion Failed:\n"
-                        "Condition: '%s'\n\n",
-                        failure->strFileName,
-                        failure->uiLineNumber,
-                        failure->strCondition
-                        );
-                break;
-              default:
-                break;
-            }
-          }
-          tmp_failure =_escape_string(failure_msg.buf);
-          _dstr_putf(&dst, "      <failure>%s</failure>\n", tmp_failure);
-          free(tmp_failure);
-          _dstr_reset(&failure_msg);
-        }
-
-        _dstr_puts(&dst, "    </testcase>\n");
-        free(esc_test_name);
+        format_testcase(&dst, esc_name, suite, test);
         test = test->pNext;
       }
+
+      /* record suite cleanup */
+      if (suite->pCleanupFuncTest) format_testcase(&dst, esc_name, suite, suite->pCleanupFuncTest);
 
       _dstr_puts(&dst, "  </testsuite>\n");
       free(esc_name);

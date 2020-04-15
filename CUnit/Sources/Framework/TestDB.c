@@ -86,6 +86,7 @@ static CU_pSuite create_suite(const char* strName, CU_InitializeFunc pInit, CU_C
 static void      cleanup_suite(CU_pSuite pSuite);
 static void      insert_suite(CU_pTestRegistry pRegistry, CU_pSuite pSuite);
 static CU_pTest  create_test(const char* strName, CU_TestFunc pTestFunc);
+static CU_pTest  create_suite_test(const char* strName, CU_BOOL suite_setup);
 static void      cleanup_test(CU_pTest pTest);
 static void      insert_test(CU_pSuite pSuite, CU_pTest pTest);
 
@@ -182,14 +183,23 @@ CU_pSuite CU_add_suite_with_setup_and_teardown(const char* strName, CU_Initializ
     pRetValue = create_suite(strName, pInit, pClean, pSetup, pTear);
     if (NULL == pRetValue) {
       error = CUE_NOMEMORY;
-    }
-    else {
+    } else {
       if (CU_TRUE == suite_exists(f_pTestRegistry, strName)) {
         error = CUE_DUP_SUITE;
       }
       insert_suite(f_pTestRegistry, pRetValue);
+
+      /* if there are suite setup and teardowns add them as "tests" */
+      if (pInit) {
+        pRetValue->pInitializeFuncTest = create_suite_test("CUnit Suite init", CU_TRUE);
+      }
+      if (pClean) {
+        pRetValue->pCleanupFuncTest = create_suite_test("CUnit Suite cleanup", CU_FALSE);
+      }
     }
   }
+
+
 
   CU_set_error(error);
   return pRetValue;
@@ -727,6 +737,14 @@ static void cleanup_suite(CU_pSuite pSuite)
   assert(NULL != pSuite);
 
   pCurTest = pSuite->pTest;
+  if (pSuite->pInitializeFuncTest) {
+    cleanup_test(pSuite->pInitializeFuncTest);
+    CU_FREE(pSuite->pInitializeFuncTest);
+  }
+  if (pSuite->pCleanupFuncTest) {
+    cleanup_test(pSuite->pCleanupFuncTest);
+    CU_FREE(pSuite->pCleanupFuncTest);
+  }
   while (NULL != pCurTest) {
     pNextTest = pCurTest->pNext;
 
@@ -825,6 +843,22 @@ static CU_pTest create_test(const char* strName, CU_TestFunc pTestFunc)
 
   return pRetValue;
 }
+
+/*
+ * Internal function to register that a suite as a setup or teardown function
+ * */
+static CU_pTest create_suite_test(const char* strName, CU_BOOL suite_setup) {
+  CU_pTest pTest = create_test(strName, NULL);
+  if (pTest) {
+    if (suite_setup) {
+      pTest->fSuiteSetup = CU_TRUE;
+    } else {
+      pTest->fSuiteCleanup = CU_TRUE;
+    }
+  }
+  return pTest;
+}
+
 
 /*------------------------------------------------------------------------*/
 /**
@@ -1037,20 +1071,17 @@ CU_pTest CU_get_test_by_name(const char* szTestName, CU_pSuite pSuite)
 /*------------------------------------------------------------------------*/
 CU_pTest CU_get_test_by_index(unsigned int index, CU_pSuite pSuite)
 {
-  CU_pTest result = NULL;
-  unsigned int i;
-
+  CU_pTest t;
+  unsigned int i = 1;
   assert(NULL != pSuite);
-
-  if ((index > 0) && (index <= pSuite->uiNumberOfTests)) {
-    result = pSuite->pTest;
-    for (i=1 ; i<index ; ++i) {
-      result = result->pNext;
-    }
+  t = pSuite->pTest;
+  while(t) {
+    if (i++ == index) return t;
+    t = t->pNext;
   }
-
-  return result;
+  return NULL;
 }
+
 /** @} */
 
 /*------------------------------------------------------------------------*/

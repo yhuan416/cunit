@@ -125,6 +125,9 @@ typedef struct CU_Test
   const char*     pSkipReason;
   const char*     pSkipFile;
   unsigned int    uiSkipLine;
+
+  CU_BOOL         fSuiteSetup;   /**< Flag set if this is a suite setup entry (not an actual test) */
+  CU_BOOL         fSuiteCleanup; /**< Flag set if this is a suite cleanup entry (not an actual test) */
 } CU_Test;
 typedef CU_Test* CU_pTest;    /**< Pointer to a CUnit test case. */
 
@@ -163,6 +166,9 @@ typedef struct CU_Suite
   CU_CleanupFunc    pCleanupFunc;     /**< Pointer to the suite cleanup function. */
   CU_SetUpFunc      pSetUpFunc;       /**< Pointer to the test SetUp function. */
   CU_TearDownFunc   pTearDownFunc;    /**< Pointer to the test TearDown function. */
+
+  CU_pTest          pInitializeFuncTest;  /**< Pointer to the "test" entry representing suite setup */
+  CU_pTest          pCleanupFuncTest;  /**< Pointer to the "test" entry representing suite cleanup */
 
   unsigned int      uiNumberOfTests;  /**< Number of tests in the suite. */
   struct CU_Suite*  pNext;            /**< Pointer to the next suite in linked list. */

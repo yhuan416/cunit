@@ -378,6 +378,36 @@ CU_EXPORT CU_pFailureRecord CU_iterate_test_failures(CU_pTest test, CU_pFailureR
  * @return
  */
 
+CU_EXPORT int CU_count_test_failures(CU_pTest pTest);
+/**<
+ *  Count the number of failures from the given test
+ * @return
+ */
+
+CU_EXPORT int CU_count_suite_failures(CU_pSuite pSuite);
+/**<
+ *  Count the number of failed tests in a suite.
+ * @return
+ */
+
+CU_EXPORT int CU_count_all_failures(CU_pTestRegistry pRegistry);
+/**<
+ *  Count the number of failed tests overall.
+ * @return
+ */
+
+CU_EXPORT int CU_count_suite_tests(CU_pSuite pSuite);
+/**
+ *  Count the number of tests in a suite.
+ * @return
+ */
+
+CU_EXPORT int CU_count_all_tests(CU_pTestRegistry pRegistry);
+/**
+ *  Count the number of tests in all suites.
+ * @return
+ */
+
 CU_EXPORT CU_pRunSummary CU_get_run_summary(void);
 /**<
  *  Retrieves the entire run summary for the last test run (reset each run).

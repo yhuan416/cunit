@@ -129,10 +129,12 @@ static void         add_failure(CU_pFailureRecord* ppFailure,
                                 const char *szFileName,
                                 CU_pSuite pSuite,
                                 CU_pTest pTest);
+static CU_pFailureRecord get_failure_tail(CU_pFailureRecord pFailureRecord);
 
 /*=================================================================
  *  Public Interface functions
  *=================================================================*/
+
 CU_BOOL CU_assertImplementation(CU_BOOL bValue,
                                 unsigned int uiLine,
                                 const char *strCondition,
@@ -379,6 +381,67 @@ CU_pFailureRecord CU_get_failure_list(void)
 {
   return f_failure_list;
 }
+
+int CU_count_test_failures(CU_pTest test) {
+  int n = 0;
+  CU_pFailureRecord failure = NULL;
+  if (test) {
+    while ((failure = CU_iterate_test_failures(test, failure)))
+      n++;
+  }
+  return n;
+}
+
+int CU_count_suite_tests(CU_pSuite pSuite) {
+  int n = 0;
+  if (pSuite) {
+    CU_pTest t = pSuite->pTest;
+    while (t) {
+      t = t->pNext;
+      n++;
+    }
+  }
+  return n;
+}
+
+int CU_count_suite_failures(CU_pSuite pSuite)
+{
+  int n = 0;
+  if (pSuite) {
+    CU_pTest t = pSuite->pTest;
+    while (t) {
+      if (CU_iterate_test_failures(t, NULL)) n++;
+      t = t->pNext;
+    }
+  }
+  return n;
+}
+
+int CU_count_all_tests(CU_pTestRegistry pRegistry)
+{
+  int n = 0;
+  if (pRegistry) {
+    CU_pSuite s = pRegistry->pSuite;
+    while (s) {
+      n += CU_count_suite_tests(s);
+      s = s->pNext;
+    }
+  }
+  return n;
+}
+
+int CU_count_all_failures(CU_pTestRegistry pRegistry) {
+  int n = 0;
+  if (pRegistry) {
+    CU_pSuite  s = pRegistry->pSuite;
+    while (s) {
+      n += CU_count_suite_failures(s);
+      s = s->pNext;
+    }
+  }
+  return n;
+}
+
 
 CU_pFailureRecord CU_iterate_test_failures(CU_pTest test, CU_pFailureRecord previous) {
   CU_pFailureRecord record = CU_get_failure_list();
@@ -693,7 +756,6 @@ static void add_failure(CU_pFailureRecord* ppFailure,
                         CU_pTest pTest)
 {
   CU_pFailureRecord pFailureNew = NULL;
-  CU_pFailureRecord pTemp = NULL;
 
   assert(NULL != ppFailure);
 
@@ -733,16 +795,14 @@ static void add_failure(CU_pFailureRecord* ppFailure,
   pFailureNew->pNext = NULL;
   pFailureNew->pPrev = NULL;
 
-  pTemp = *ppFailure;
-  if (NULL != pTemp) {
-    while (NULL != pTemp->pNext) {
-      pTemp = pTemp->pNext;
-    }
-    pTemp->pNext = pFailureNew;
-    pFailureNew->pPrev = pTemp;
-  }
-  else {
-    *ppFailure = pFailureNew;
+  if (!*ppFailure) {
+    /* no existing failures */
+  *ppFailure = pFailureNew;
+  } else {
+    /* append to the list */
+    CU_pFailureRecord last = get_failure_tail(*ppFailure);
+    pFailureNew->pPrev = last;
+    last->pNext = pFailureNew;
   }
 
   if (NULL != pRunSummary) {
@@ -862,12 +922,17 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
     pSuite->dStarted = CU_get_clock_sec();
     /* run the suite initialization function, if any */
     if (NULL != pSuite->pInitializeFunc) {
+      /* we have a suite init function and a "test" for it */
+      if (pSuite->pInitializeFuncTest)
+        pSuite->pInitializeFuncTest->dStarted = pSuite->dStarted;
       pSuite->fInSetUp = CU_TRUE;
       if ((CUE_SUCCESS != (*pSuite->pInitializeFunc)()) || pSuite->fSetUpError) {
         /* init function returned a failure */
         result = CUE_SINIT_FAILED;
         pSuite->fSetUpError = CU_TRUE;
       }
+      if (pSuite->pInitializeFuncTest)
+        pSuite->pInitializeFuncTest->dEnded = CU_get_clock_sec();
       pSuite->fInSetUp = CU_FALSE;
 
       if (pSuite->fSkipped == CU_TRUE) {
@@ -881,7 +946,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
           pRunSummary->nSuitesFailed++;
           add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
                       _("Suite Initialization failed - Suite Skipped"),
-                      _("CUnit System"), pSuite, NULL);
+                      _("CUnit System"), pSuite, pSuite->pInitializeFuncTest);
           result = CUE_SINIT_FAILED;
         }
       }
@@ -921,10 +986,14 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
 
       /* call the suite cleanup function, if any */
       if (NULL != pSuite->pCleanupFunc) {
+        if (pSuite->pCleanupFuncTest)
+          pSuite->pCleanupFuncTest->dStarted = CU_get_clock_sec();
         pSuite->fInClean = CU_TRUE;
         if ((CUE_SUCCESS != (*pSuite->pCleanupFunc)()) || pSuite->fCleanupError) {
           result = CUE_SCLEAN_FAILED;
         }
+        if (pSuite->pCleanupFuncTest)
+          pSuite->pCleanupFuncTest->dEnded = CU_get_clock_sec();
         pSuite->fInClean = CU_FALSE;
 
         if (result != CUE_SUCCESS) {
@@ -932,7 +1001,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
           pSuite->fCleanupError = CU_TRUE;
           pRunSummary->nSuitesFailed++;
           add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
-                      0, _("Suite cleanup failed."), _("CUnit System"), pSuite, NULL);
+                      0, _("Suite cleanup failed."), _("CUnit System"), pSuite, pSuite->pCleanupFuncTest);
         }
       }
     }
@@ -952,12 +1021,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
 
   /* if additional failures have occurred... */
   if (pRunSummary->nFailureRecords > nStartFailures) {
-    if (NULL != pLastFailure) {
-      pLastFailure = pLastFailure->pNext;  /* was a previous failure, so go to next one */
-    }
-    else {
-      pLastFailure = f_failure_list;       /* no previous failure - go to 1st one */
-    }
+    pLastFailure = get_failure_tail(f_failure_list);
   }
   else {
     pLastFailure = NULL;                   /* no additional failure - set to NULL */
@@ -1004,6 +1068,9 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
 
   f_pCurTest = pTest;
 
+
+  if ((pTest->fSuiteCleanup || pTest->fSuiteSetup)) return CUE_TEST_INACTIVE;
+
   CCU_MessageHandler_Run(CUMSG_TEST_STARTED, f_pCurSuite, f_pCurTest, NULL);
 
   /* run test if it is active */
@@ -1012,23 +1079,27 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
     assert(buf && "failed to allocate test jmp_buf");
 
     pTest->dStarted = CU_get_clock_sec();
-    if (NULL != f_pCurSuite->pSetUpFunc) {
-      (*f_pCurSuite->pSetUpFunc)();
-    }
+    if (f_pCurSuite->fSkipped != CU_TRUE) {
 
-    if ((!f_pCurSuite->fSkipped) && (!f_pCurTest->fSkipped)) {
+      if (NULL != f_pCurSuite->pSetUpFunc) {
+        /* suite as a test setup, so run it */
+        (*f_pCurSuite->pSetUpFunc)();
+      }
 
-      /* set jmp_buf and run test */
-      pTest->pJumpBuf = buf;
-      if (0 == setjmp(*buf)) {
-        if (NULL != pTest->pTestFunc) {
-          (*pTest->pTestFunc)();
+      /* check to see if the setup function skipped */
+      if (f_pCurTest->fSkipped != CU_TRUE) {
+        /* set jmp_buf and run test */
+        pTest->pJumpBuf = buf;
+        if (0 == setjmp(*buf)) {
+          if (NULL != pTest->pTestFunc) {
+            (*pTest->pTestFunc)();
+          }
         }
       }
-    }
 
-    if (NULL != f_pCurSuite->pTearDownFunc) {
-       (*f_pCurSuite->pTearDownFunc)();
+      if (NULL != f_pCurSuite->pTearDownFunc) {
+        (*f_pCurSuite->pTearDownFunc)();
+      }
     }
     pTest->dEnded = CU_get_clock_sec();
     pRunSummary->nTestsRun++;
@@ -1050,12 +1121,7 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
   if (pRunSummary->nFailureRecords > nStartFailures) {
     pRunSummary->nTestsFailed++;
     f_pCurTest->uFailedRuns++;
-    if (NULL != pLastFailure) {
-      pLastFailure = pLastFailure->pNext;  /* was a previous failure, so go to next one */
-    }
-    else {
-      pLastFailure = f_failure_list;       /* no previous failure - go to 1st one */
-    }
+    pLastFailure = get_failure_tail(f_failure_list);
   }
   else {
     pLastFailure = NULL;                   /* no additional failure - set to NULL */
@@ -1071,6 +1137,14 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
   f_pCurTest = NULL;
 
   return result;
+}
+
+static CU_pFailureRecord get_failure_tail(CU_pFailureRecord pFailureRecord) {
+  if (pFailureRecord) {
+    while (pFailureRecord->pNext)
+      pFailureRecord = pFailureRecord->pNext;
+  }
+  return pFailureRecord;
 }
 
 /** @} */

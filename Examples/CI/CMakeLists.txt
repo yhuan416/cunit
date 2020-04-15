@@ -8,6 +8,14 @@ target_link_libraries(
         cunit
 )
 
+add_executable(cicd-fail-setupfuncs
+        cicd-fail-setupfuncs.c
+)
+target_link_libraries(
+        cicd-fail-setupfuncs
+        cunit
+)
+
 add_executable(cicd-pass-plain
         cicd-pass-plain.c
         )
@@ -50,5 +58,9 @@ add_test(NAME
   cicd-skips COMMAND $<TARGET_FILE:cicd-skips>)
 add_test(NAME
   cicd-skip-suite COMMAND $<TARGET_FILE:cicd-skip-suite>)
+
+# negative tests
+add_test(NAME
+  cicd-fail-setupfuncs COMMAND $<TARGET_FILE:cicd-fail-setupfuncs>)
 
 
