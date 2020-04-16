@@ -112,7 +112,9 @@ static char* _dstr_release(cu_dstr *dst) {
 static int _dstr_putf(cu_dstr *dst, const char* format, ...) {
   va_list args;
   va_list args_copy;
+#if !(defined(_WIN32) || defined(__CYGWIN__))
   char tmp_buf[2];
+#endif
   int need = 0;
   int rv;
   va_start(args, format);

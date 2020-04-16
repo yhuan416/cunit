@@ -8,6 +8,10 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Werror=strict-prototypes")
 endif()
 
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /WX /wd4996")
+endif()
+
 add_subdirectory(CUnit)
 add_subdirectory(Tests)
 add_subdirectory(Examples)
