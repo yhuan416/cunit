@@ -26,8 +26,11 @@ stages:
     - build-*/cunit-*.tar.gz
     - build-*/cunit-*.deb
     - build-*/Examples/CI/*-Results.*
+    - build-*/Tests/*.xml
     reports:
-      junit: build-*/Examples/CI/*-Results.xml
+      junit:
+      - build-*/Examples/CI/*-Results.xml
+      - build-*/Tests/*-Results.xml
 
 cunit-ubuntu-19.04-power9:
   <<: *cunit-build
@@ -112,7 +115,7 @@ cmake-pkgexample-ubuntu-18.04:
 
 cunit-win2019-vs2015:
   stage: build
-  image: registry.gitlab.com/cunity/windows-cmake-docker/win2019-vs2015:master
+  image: cunity/windows-2019-vs2015-cmake:master
   tags:
     - cunity-windows-2019-docker
   script:
@@ -124,6 +127,11 @@ cunit-win2019-vs2015:
   artifacts:
     paths:
       - build-win2019-vs2015\\Examples\\CI\\*-Results.*
+      - build-win2019-vs2015\\Tests\\*.xml
+    reports:
+      junit:
+        - build-win2019-vs2015\\Examples\\CI\\*-Results.xml
+        - build-win2019-vs2015\\Tests\\*-Results.xml
   except: 
     - schedules
   only:

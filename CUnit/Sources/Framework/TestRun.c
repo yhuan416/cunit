@@ -1083,7 +1083,9 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
 
       if (NULL != f_pCurSuite->pSetUpFunc) {
         /* suite as a test setup, so run it */
+        f_pCurSuite->fInTestSetup = CU_TRUE;
         (*f_pCurSuite->pSetUpFunc)();
+        f_pCurSuite->fInTestSetup = CU_FALSE;
       }
 
       /* check to see if the setup function skipped */
@@ -1098,7 +1100,11 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
       }
 
       if (NULL != f_pCurSuite->pTearDownFunc) {
-        (*f_pCurSuite->pTearDownFunc)();
+        if (!f_pCurSuite->fInTestClean) {
+          f_pCurSuite->fInTestClean = CU_TRUE;
+          (*f_pCurSuite->pTearDownFunc)();
+          f_pCurSuite->fInTestClean = CU_FALSE;
+        }
       }
     }
     pTest->dEnded = CU_get_clock_sec();

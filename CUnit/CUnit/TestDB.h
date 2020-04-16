@@ -179,9 +179,11 @@ typedef struct CU_Suite
 
   CU_BOOL           fSetUpError;     /**< Flag set if the suite setup function failed  a CU_ASSERT */
   CU_BOOL           fCleanupError;   /**< Flag set if the suite cleanup function failed a CU_ASSERT*/
-  CU_BOOL           fInSetUp;	     /**< Flag set if we are running the suite setup function */
-  CU_BOOL           fInClean;	     /**< Flag set if we are running the suite cleanup function */
+  CU_BOOL           fInSetUp;	       /**< Flag set if we are running the suite setup function */
+  CU_BOOL           fInClean;	       /**< Flag set if we are running the suite cleanup function */
   CU_BOOL           fSkipped;        /**< Flag for whether the suite was skipped during a run */
+  CU_BOOL           fInTestSetup;    /**< Flag set if we are running a test setup function */
+  CU_BOOL           fInTestClean;    /**< Flag set if we are running a test teardown function */
 
   const char*       pSkipReason;
   const char*       pSkipFile;

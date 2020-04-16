@@ -9,4 +9,5 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
 endif()
 
 add_subdirectory(CUnit)
+add_subdirectory(Tests)
 add_subdirectory(Examples)
