@@ -685,12 +685,11 @@ CU_EXPORT char * CU_get_run_results_string(void)
 
 {
   CU_pRunSummary s = &f_run_summary;
-  CU_pTestRegistry r = CU_get_registry();
   size_t max_result_len = 8192;
   char *result;
 
   assert(NULL != s);
-  assert(NULL != r);
+  assert(NULL != CU_get_registry());
 
   result = CU_MALLOC(max_result_len);
   if (result) {
