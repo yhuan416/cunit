@@ -2,9 +2,17 @@ project(CUnit C)
 
 set(CUNIT_VERSION_MAJOR 3)
 set(CUNIT_VERSION_MINOR 2)
-set(CUNIT_VERSION_PATCH 6)
+set(CUNIT_VERSION_PATCH 7)
 set(CUNIT_VERSION "${CUNIT_VERSION_MAJOR}.${CUNIT_VERSION_MINOR}.${CUNIT_VERSION_PATCH}")
 set(CUNIT_RELEASE cunity)
+
+if(NOT DEFINED CUNIT_DISABLE_TESTS)
+  set(CUNIT_DISABLE_TESTS FALSE)
+endif()
+if(NOT DEFINED CUNIT_DISABLE_EXAMPLES)
+  set(CUNIT_DISABLE_EXAMPLES FALSE)
+endif()
+
 
 
 cmake_minimum_required (VERSION 3.2)
@@ -60,6 +68,7 @@ if(UNIX AND NOT APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES "Linux")
   list(APPEND cunit_libs m)
 endif()
 
+
 add_library(cunit STATIC ${cunit_srcs})
 target_link_libraries(cunit
   PUBLIC
@@ -69,29 +78,30 @@ target_include_directories(cunit
     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
     $<INSTALL_INTERFACE:include>)
 
+if(NOT CUNIT_DISABLE_TESTS)
+  # for internal test program
+  add_executable(cunit_test
+    ${cunit_srcs}
+    ${Test}
+    )
 
-# for internal test program
-add_executable(cunit_test
-  ${cunit_srcs}
-  ${Test}
-  )
+  add_test(NAME 
+    cunit_test COMMAND $<TARGET_FILE:cunit_test>)
 
-add_test(NAME 
-  cunit_test COMMAND $<TARGET_FILE:cunit_test>)
-
-target_include_directories(cunit_test
-  PRIVATE
-    Sources/Framework
-    Sources/Test
-    ${CMAKE_CURRENT_LIST_DIR}
-  )
-target_link_libraries(cunit_test
-  ${cunit_libs})
-target_compile_definitions(cunit_test
-  PRIVATE
-    CUNIT_BUILD_TESTS
-    MEMTRACE
-    CUNIT_DO_NOT_DEFINE_UNLESS_BUILDING_TESTS)
+  target_include_directories(cunit_test
+    PRIVATE
+      Sources/Framework
+      Sources/Test
+      ${CMAKE_CURRENT_LIST_DIR}
+    )
+  target_link_libraries(cunit_test
+    ${cunit_libs})
+  target_compile_definitions(cunit_test
+    PRIVATE
+      CUNIT_BUILD_TESTS
+      MEMTRACE
+      CUNIT_DO_NOT_DEFINE_UNLESS_BUILDING_TESTS)
+endif()
 
 if(CUNIT_CMAKE_INSTALL STREQUAL yes)
   install(DIRECTORY CUnit/ DESTINATION include/CUnit)

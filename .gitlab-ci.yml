@@ -42,6 +42,16 @@ cunit-ubuntu-19.04-power9:
     variables:
       - $GITLAB_LINUX_POWER9
 
+cunit-ubuntu-18.04-notests:
+  stage: build
+  image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
+  script:
+    - mkdir build-${CI_JOB_NAME}
+    - cd build-${CI_JOB_NAME}
+    - cmake -G "Unix Makefiles" .. -DCUNIT_DISABLE_TESTS=TRUE -DCUNIT_DISABLE_EXAMPLES=TRUE
+    - cmake --build .
+    - find . -type f
+
 cunit-ubuntu-18.04:
   <<: *cunit-build
   stage: build
