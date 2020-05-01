@@ -1,12 +1,13 @@
+# Static file is generated/linked against for this project
+#   Fixes issues with toolchains which only support static linking
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
 project(CUnit C)
 
 cmake_minimum_required (VERSION 3.2)
 
 set(CUNIT_DISABLE_TESTS CACHE INTERNAL FALSE)
 set(CUNIT_DISABLE_EXAMPLES CACHE INTERNAL FALSE)
-if(CMAKE_CROSSCOMPILING)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
-endif()
 
 enable_testing()
 set(CUNIT_CMAKE_INSTALL yes)
