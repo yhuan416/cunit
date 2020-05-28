@@ -266,7 +266,7 @@ const char* CU_get_basename(const char* path)
 #ifdef WIN32
   (void) i;
   /* use _splitpath to strip the file extension */
-  assert(strlen(path) < _MAX_PATH);
+  assert(path_len < _MAX_PATH);
   _splitpath(path, NULL, NULL, _exename_buf, NULL);
   return _exename_buf;
 #else
