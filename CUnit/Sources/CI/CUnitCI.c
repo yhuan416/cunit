@@ -86,31 +86,25 @@ static void cu_ci_suite_cleanup_failed(const CU_pSuite pSuite)
 }
 
 static void setup_handlers(void) {
-    CCU_MessageHandler handler = {0};
+    CCU_MessageHandlerFunction func;
 
-    handler.type = CUMSG_SUITE_STARTED;
-    handler.func.suite_start = cu_ci_suite_started;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.suite_start = cu_ci_suite_started;
+    CCU_MessageHandler_Add(CUMSG_SUITE_STARTED, func);
 
-    handler.type = CUMSG_TEST_STARTED;
-    handler.func.test_started = cu_ci_test_started;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.test_started = cu_ci_test_started;
+    CCU_MessageHandler_Add(CUMSG_TEST_STARTED, func);
 
-    handler.type = CUMSG_TEST_COMPLETED;
-    handler.func.test_completed = cu_ci_test_completed;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.test_completed = cu_ci_test_completed;
+    CCU_MessageHandler_Add(CUMSG_TEST_COMPLETED, func);
 
-    handler.type = CUMSG_SUITE_SETUP_FAILED;
-    handler.func.suite_setup_failed = cu_ci_suite_setup_failed;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.suite_setup_failed = cu_ci_suite_setup_failed;
+    CCU_MessageHandler_Add(CUMSG_SUITE_SETUP_FAILED, func);
 
-    handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
-    handler.func.suite_setup_failed = cu_ci_suite_cleanup_failed;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.suite_setup_failed = cu_ci_suite_cleanup_failed;
+    CCU_MessageHandler_Add(CUMSG_SUITE_TEARDOWN_FAILED, func);
 
-    handler.type = CUMSG_TEST_SKIPPED;
-    handler.func.test_skipped = cu_ci_test_skipped;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.test_skipped = cu_ci_test_skipped;
+    CCU_MessageHandler_Add(CUMSG_TEST_SKIPPED, func);
 }
 
 static char ** cunit_main_argv = NULL;

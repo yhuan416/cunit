@@ -103,35 +103,28 @@ static void automated_suite_skipped_message_handler(const CU_pSuite pSuite);
 
 void CCU_automated_add_handlers(void)
 {
-    CCU_MessageHandler handler = {0};
+    CCU_MessageHandlerFunction func;
 
-    handler.type = CUMSG_TEST_STARTED;
-    handler.func.test_started = automated_test_start_message_handler;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.test_started = automated_test_start_message_handler;
+    CCU_MessageHandler_Add(CUMSG_TEST_STARTED, func);
 
-    handler.type = CUMSG_TEST_COMPLETED;
-    handler.func.test_completed = automated_test_complete_message_handler;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.test_completed = automated_test_complete_message_handler;
+    CCU_MessageHandler_Add(CUMSG_TEST_COMPLETED, func);
 
-    handler.type = CUMSG_TEST_SKIPPED;
-    handler.func.test_skipped = automated_test_skipped_message_handler;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.test_skipped = automated_test_skipped_message_handler;
+    CCU_MessageHandler_Add(CUMSG_TEST_SKIPPED, func);
 
-    handler.type = CUMSG_ALL_COMPLETED;
-    handler.func.all_completed = automated_all_tests_complete_message_handler;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.all_completed = automated_all_tests_complete_message_handler;
+    CCU_MessageHandler_Add(CUMSG_ALL_COMPLETED, func);
 
-    handler.type = CUMSG_SUITE_SETUP_FAILED;
-    handler.func.suite_setup_failed = automated_suite_init_failure_message_handler;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.suite_setup_failed = automated_suite_init_failure_message_handler;
+    CCU_MessageHandler_Add(CUMSG_SUITE_SETUP_FAILED, func);
 
-    handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
-    handler.func.suite_teardown_failed = automated_suite_cleanup_failure_message_handler;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.suite_teardown_failed = automated_suite_cleanup_failure_message_handler;
+    CCU_MessageHandler_Add(CUMSG_SUITE_TEARDOWN_FAILED, func);
 
-    handler.type = CUMSG_SUITE_SKIPPED;
-    handler.func.suite_teardown_failed = automated_suite_skipped_message_handler;
-    CCU_MessageHandler_Add(handler.type, &handler);
+    func.suite_teardown_failed = automated_suite_skipped_message_handler;
+    CCU_MessageHandler_Add(CUMSG_SUITE_SKIPPED, func);
 }
 
 /*=================================================================

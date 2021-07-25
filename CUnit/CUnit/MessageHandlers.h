@@ -44,11 +44,9 @@ typedef union CU_MessageHandlerFunction {
  * The handler for a CUnit Event.
  */
 typedef struct CCU_MessageHandler {
-    CCU_MessageType type;
     CCU_MessageHandlerFunction func;
     struct CCU_MessageHandler *prev;
     struct CCU_MessageHandler *next;
-    struct CCU_MessageHandler *tail;
 } CCU_MessageHandler;
 
 
@@ -57,7 +55,7 @@ typedef struct CCU_MessageHandler {
  * @param type
  * @param handler
  */
-void CCU_MessageHandler_Add(CCU_MessageType type, const CCU_MessageHandler *handler);
+void CCU_MessageHandler_Add(CCU_MessageType type, CCU_MessageHandlerFunction func);
 
 /**
  * Clear all the message handlers for the given event type.
@@ -70,7 +68,7 @@ void CCU_MessageHandler_Clear(CCU_MessageType type);
  * @param type
  * @param handler
  */
-void CCU_MessageHandler_Set(CCU_MessageType type, const CCU_MessageHandler *handler);
+void CCU_MessageHandler_Set(CCU_MessageType type, CCU_MessageHandlerFunction func);
 
 /**
  * Run a message handler

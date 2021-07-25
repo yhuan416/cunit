@@ -213,81 +213,72 @@ void CU_SkipImplementation(CU_BOOL value,
 /*------------------------------------------------------------------------*/
 void CU_set_suite_start_handler(CU_SuiteStartMessageHandler pSuiteStartHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_SUITE_STARTED;
-  handler.func.suite_start = pSuiteStartHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.suite_start = pSuiteStartHandler;
+  CCU_MessageHandler_Set(CUMSG_SUITE_STARTED, func);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_test_start_handler(CU_TestStartMessageHandler pTestStartHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_TEST_STARTED;
-  handler.func.test_started = pTestStartHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.test_started = pTestStartHandler;
+  CCU_MessageHandler_Set(CUMSG_TEST_STARTED, func);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_test_complete_handler(CU_TestCompleteMessageHandler pTestCompleteHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_TEST_COMPLETED;
-  handler.func.test_completed = pTestCompleteHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.test_completed = pTestCompleteHandler;
+  CCU_MessageHandler_Set(CUMSG_TEST_COMPLETED, func);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_test_skipped_handler(CU_TestSkippedMessageHandler pTestSkippedHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_TEST_SKIPPED;
-  handler.func.test_skipped = pTestSkippedHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.test_skipped = pTestSkippedHandler;
+  CCU_MessageHandler_Set(CUMSG_TEST_SKIPPED, func);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_suite_complete_handler(CU_SuiteCompleteMessageHandler pSuiteCompleteHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_SUITE_COMPLETED;
-  handler.func.suite_completed = pSuiteCompleteHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.suite_completed = pSuiteCompleteHandler;
+  CCU_MessageHandler_Set(CUMSG_SUITE_COMPLETED, func);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_all_test_complete_handler(CU_AllTestsCompleteMessageHandler pAllTestsCompleteHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_ALL_COMPLETED;
-  handler.func.all_completed = pAllTestsCompleteHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.all_completed = pAllTestsCompleteHandler;
+  CCU_MessageHandler_Set(CUMSG_ALL_COMPLETED, func);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_suite_init_failure_handler(CU_SuiteInitFailureMessageHandler pSuiteInitFailureHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_SUITE_SETUP_FAILED;
-  handler.func.suite_setup_failed = pSuiteInitFailureHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.suite_setup_failed = pSuiteInitFailureHandler;
+  CCU_MessageHandler_Set(CUMSG_SUITE_SETUP_FAILED, func);
 }
 
 /*------------------------------------------------------------------------*/
 void CU_set_suite_cleanup_failure_handler(CU_SuiteCleanupFailureMessageHandler pSuiteCleanupFailureHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
-  handler.func.suite_teardown_failed = pSuiteCleanupFailureHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.suite_teardown_failed = pSuiteCleanupFailureHandler;
+  CCU_MessageHandler_Set(CUMSG_SUITE_TEARDOWN_FAILED, func);
 }
 
 void CU_set_suite_skipped_handler(CU_SuiteSkippedMessageHandler pSkippedHandler)
 {
-  CCU_MessageHandler handler = {0};
-  handler.type = CUMSG_SUITE_SKIPPED;
-  handler.func.suite_teardown_failed = pSkippedHandler;
-  CCU_MessageHandler_Set(handler.type, &handler);
+  CCU_MessageHandlerFunction func;
+  func.suite_skipped = pSkippedHandler;
+  CCU_MessageHandler_Set(CUMSG_SUITE_SKIPPED, func);
 }
 
 CU_EXPORT double CU_get_test_duration(CU_pTest pTest) {

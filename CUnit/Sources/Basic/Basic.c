@@ -338,37 +338,25 @@ static void basic_suite_cleanup_failure_message_handler(const CU_pSuite pSuite)
 
 void CCU_basic_add_handlers(void)
 {
-  CCU_MessageHandler handler;
+  CCU_MessageHandlerFunction func;
 
-  memset(&handler, 0, sizeof(handler));
-  handler.type = CUMSG_TEST_STARTED;
-  handler.func.test_started = basic_test_start_message_handler;
-  CCU_MessageHandler_Add(handler.type, &handler);
+  func.test_started = basic_test_start_message_handler;
+  CCU_MessageHandler_Add(CUMSG_TEST_STARTED, func);
 
-  memset(&handler, 0, sizeof(handler));
-  handler.type = CUMSG_TEST_COMPLETED;
-  handler.func.test_completed = basic_test_complete_message_handler;
-  CCU_MessageHandler_Add(handler.type, &handler);
+  func.test_completed = basic_test_complete_message_handler;
+  CCU_MessageHandler_Add(CUMSG_TEST_COMPLETED, func);
 
-  memset(&handler, 0, sizeof(handler));
-  handler.type = CUMSG_ALL_COMPLETED;
-  handler.func.all_completed = basic_all_tests_complete_message_handler;
-  CCU_MessageHandler_Add(handler.type, &handler);
+  func.all_completed = basic_all_tests_complete_message_handler;
+  CCU_MessageHandler_Add(CUMSG_ALL_COMPLETED, func);
 
-  memset(&handler, 0, sizeof(handler));
-  handler.type = CUMSG_SUITE_SETUP_FAILED;
-  handler.func.suite_setup_failed = basic_suite_init_failure_message_handler;
-  CCU_MessageHandler_Add(handler.type, &handler);
+  func.suite_setup_failed = basic_suite_init_failure_message_handler;
+  CCU_MessageHandler_Add(CUMSG_SUITE_SETUP_FAILED, func);
 
-  memset(&handler, 0, sizeof(handler));
-  handler.type = CUMSG_SUITE_TEARDOWN_FAILED;
-  handler.func.suite_teardown_failed = basic_suite_cleanup_failure_message_handler;
-  CCU_MessageHandler_Add(handler.type, &handler);
+  func.suite_teardown_failed = basic_suite_cleanup_failure_message_handler;
+  CCU_MessageHandler_Add(CUMSG_SUITE_TEARDOWN_FAILED, func);
 
-  memset(&handler, 0, sizeof(handler));
-  handler.type = CUMSG_TEST_SKIPPED;
-  handler.func.test_skipped = basic_test_skipped_message_handler;
-  CCU_MessageHandler_Add(handler.type, &handler);
+  func.test_skipped = basic_test_skipped_message_handler;
+  CCU_MessageHandler_Add(CUMSG_TEST_SKIPPED, func);
 }
 
 /** @} */
