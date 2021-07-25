@@ -123,7 +123,7 @@ void CCU_automated_add_handlers(void)
     func.suite_teardown_failed = automated_suite_cleanup_failure_message_handler;
     CCU_MessageHandler_Add(CUMSG_SUITE_TEARDOWN_FAILED, func);
 
-    func.suite_teardown_failed = automated_suite_skipped_message_handler;
+    func.suite_skipped = automated_suite_skipped_message_handler;
     CCU_MessageHandler_Add(CUMSG_SUITE_SKIPPED, func);
 }
 
