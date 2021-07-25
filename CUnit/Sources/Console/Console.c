@@ -495,9 +495,9 @@ static void list_suites(CU_pTestRegistry pRegistry)
 
   assert(NULL != pRegistry->pSuite);
 
-  /* only need to calculate formatting widths once */
-  if (0 == width[0]) {
-    width[0] = (int) CU_number_width(pRegistry->uiNumberOfSuites) + 1;
+  /* only number of suite can change between calls */
+  width[0] = (int) CU_number_width(pRegistry->uiNumberOfSuites) + 1;
+  if (0 == width[1]) {
     width[1] = 34;
     width[2] = (int)CU_MAX(strlen(_("Init?")), CU_MAX(f_yes_width, f_no_width)) + 1;
     width[3] = (int)CU_MAX(strlen(_("Cleanup?")), CU_MAX(f_yes_width, f_no_width)) + 1;
