@@ -62,7 +62,7 @@
 
 #ifdef MEMTRACE
 
-#define MAX_FILE_NAME_LENGTH  256
+#define MAX_NAME_LENGTH  256
 
 /** Default name for memory dump file. */
 static const char* f_szDefaultDumpFileName = "CUnit-Memory-Dump.xml";
@@ -79,9 +79,11 @@ static CU_BOOL f_bTestCunitMallocActive = CU_TRUE;
 typedef struct mem_event {
   size_t            Size;
   unsigned int      AllocLine;
-  char              AllocFilename[MAX_FILE_NAME_LENGTH];
+  char              AllocFilename[MAX_NAME_LENGTH];
+  char              AllocFunction[MAX_NAME_LENGTH];
   unsigned int      DeallocLine;
-  char              DeallocFilename[MAX_FILE_NAME_LENGTH];
+  char              DeallocFilename[MAX_NAME_LENGTH];
+  char              DeallocFunction[MAX_NAME_LENGTH];
   struct mem_event* pNext;
 } MEMORY_EVENT;
 typedef MEMORY_EVENT* PMEMORY_EVENT;
@@ -153,7 +155,8 @@ static PMEMORY_NODE create_memory_node(void* pLocation)
 static PMEMORY_EVENT add_memory_event(PMEMORY_NODE pMemoryNode,
                                       size_t size,
                                       unsigned int alloc_line,
-                                      const char* alloc_filename)
+                                      const char* alloc_filename,
+                                      const char* alloc_function)
 {
   PMEMORY_EVENT pMemoryEvent = NULL;
   PMEMORY_EVENT pTempEvent = NULL;
@@ -166,10 +169,13 @@ static PMEMORY_EVENT add_memory_event(PMEMORY_NODE pMemoryNode,
 
   pMemoryEvent->Size = size;
   pMemoryEvent->AllocLine = alloc_line;
-  strncpy(pMemoryEvent->AllocFilename, alloc_filename, (size_t) MAX_FILE_NAME_LENGTH-1);
-  pMemoryEvent->AllocFilename[MAX_FILE_NAME_LENGTH-1] = (char)0;
+  strncpy(pMemoryEvent->AllocFilename, alloc_filename, (size_t) MAX_NAME_LENGTH-1);
+  pMemoryEvent->AllocFilename[MAX_NAME_LENGTH-1] = (char)0;
+  strncpy(pMemoryEvent->AllocFunction, alloc_function, (size_t) MAX_NAME_LENGTH-1);
+  pMemoryEvent->AllocFunction[MAX_NAME_LENGTH-1] = (char)0;
   pMemoryEvent->DeallocLine = NOT_DELETED;
   pMemoryEvent->DeallocFilename[0] = (char)0;
+  pMemoryEvent->DeallocFunction[0] = (char)0;
   pMemoryEvent->pNext = NULL;
 
   /* add the new event to the end of the linked list */
@@ -193,7 +199,8 @@ static PMEMORY_EVENT add_memory_event(PMEMORY_NODE pMemoryNode,
 static PMEMORY_NODE allocate_memory(size_t nSize,
                                     void* pLocation,
                                     unsigned int uiAllocationLine,
-                                    const char* szAllocationFile)
+                                    const char* szAllocationFile,
+                                    const char* szAllocationFunction)
 {
   PMEMORY_NODE pMemoryNode = NULL;
 
@@ -206,14 +213,17 @@ static PMEMORY_NODE allocate_memory(size_t nSize,
   }
 
   /* add the new event record */
-  add_memory_event(pMemoryNode, nSize, uiAllocationLine, szAllocationFile);
+  add_memory_event(pMemoryNode, nSize, uiAllocationLine, szAllocationFile, szAllocationFunction);
 
   return pMemoryNode;
 }
 
 /*------------------------------------------------------------------------*/
 /** Record memory deallocation event. */
-static void deallocate_memory(void* pLocation, unsigned int uiDeletionLine, const char* szDeletionFileName)
+static void deallocate_memory(void* pLocation,
+                              unsigned int uiDeletionLine,
+                              const char* szDeletionFileName,
+                              const char* szDeletionFunction)
 {
   PMEMORY_NODE  pMemoryNode = NULL;
   PMEMORY_EVENT pTempEvent = NULL;
@@ -227,7 +237,7 @@ static void deallocate_memory(void* pLocation, unsigned int uiDeletionLine, cons
   /* if no entry, then an unallocated pointer was freed */
   if (NULL == pMemoryNode) {
     pMemoryNode = create_memory_node(pLocation);
-    pTempEvent = add_memory_event(pMemoryNode, 0, NOT_ALLOCATED, "");
+    pTempEvent = add_memory_event(pMemoryNode, 0, NOT_ALLOCATED, "", "");
   }
   else {
     /* there should always be at least 1 event for an existing memory node */
@@ -241,18 +251,20 @@ static void deallocate_memory(void* pLocation, unsigned int uiDeletionLine, cons
 
     /* if pointer has already been freed, create a new event for double deletion */
     if (NOT_DELETED != pTempEvent->DeallocLine) {
-      pTempEvent = add_memory_event(pMemoryNode, pTempEvent->Size, NOT_ALLOCATED, "");
+      pTempEvent = add_memory_event(pMemoryNode, pTempEvent->Size, NOT_ALLOCATED, "", "");
     }
   }
 
   pTempEvent->DeallocLine = uiDeletionLine;
-  strncpy(pTempEvent->DeallocFilename, szDeletionFileName, MAX_FILE_NAME_LENGTH-1);
-  pTempEvent->DeallocFilename[MAX_FILE_NAME_LENGTH-1] = (char)0;
+  strncpy(pTempEvent->DeallocFilename, szDeletionFileName, MAX_NAME_LENGTH-1);
+  pTempEvent->DeallocFilename[MAX_NAME_LENGTH-1] = (char)0;
+  strncpy(pTempEvent->DeallocFunction, szDeletionFunction, MAX_NAME_LENGTH-1);
+  pTempEvent->DeallocFunction[MAX_NAME_LENGTH-1] = (char)0;
 }
 
 /*------------------------------------------------------------------------*/
 /** Custom calloc function with memory event recording. */
-void* CU_calloc(size_t nmemb, size_t size, unsigned int uiLine, const char* szFileName)
+void* CU_calloc(size_t nmemb, size_t size, unsigned int uiLine, const char* szFileName, const char* szFunction)
 {
   void* pVoid = NULL;
 
@@ -264,7 +276,7 @@ void* CU_calloc(size_t nmemb, size_t size, unsigned int uiLine, const char* szFi
 
   pVoid = calloc(nmemb, size);
   if (NULL != pVoid) {
-    allocate_memory(nmemb * size, pVoid, uiLine, szFileName);
+    allocate_memory(nmemb * size, pVoid, uiLine, szFileName, szFunction);
   }
 
   return pVoid;
@@ -272,7 +284,7 @@ void* CU_calloc(size_t nmemb, size_t size, unsigned int uiLine, const char* szFi
 
 /*------------------------------------------------------------------------*/
 /** Custom malloc function with memory event recording. */
-void* CU_malloc(size_t size, unsigned int uiLine, const char* szFileName)
+void* CU_malloc(size_t size, unsigned int uiLine, const char* szFileName, const char* szFunction)
 {
   void* pVoid = NULL;
 
@@ -284,7 +296,7 @@ void* CU_malloc(size_t size, unsigned int uiLine, const char* szFileName)
 
   pVoid = malloc(size);
   if (NULL != pVoid) {
-    allocate_memory(size, pVoid, uiLine, szFileName);
+    allocate_memory(size, pVoid, uiLine, szFileName, szFunction);
   }
 
   return pVoid;
@@ -292,19 +304,19 @@ void* CU_malloc(size_t size, unsigned int uiLine, const char* szFileName)
 
 /*------------------------------------------------------------------------*/
 /** Custom free function with memory event recording. */
-void CU_free(void *ptr, unsigned int uiLine, const char* szFileName)
+void CU_free(void *ptr, unsigned int uiLine, const char* szFileName, const char* szFunction)
 {
-  deallocate_memory(ptr, uiLine, szFileName);
+  deallocate_memory(ptr, uiLine, szFileName, szFunction);
   free(ptr);
 }
 
 /*------------------------------------------------------------------------*/
 /** Custom realloc function with memory event recording. */
-void* CU_realloc(void *ptr, size_t size, unsigned int uiLine, const char* szFileName)
+void* CU_realloc(void *ptr, size_t size, unsigned int uiLine, const char* szFileName, const char* szFunction)
 {
   void* pVoid = NULL;
 
-  deallocate_memory(ptr, uiLine, szFileName);
+  deallocate_memory(ptr, uiLine, szFileName, szFunction);
 
 #ifdef CUNIT_BUILD_TESTS
   if (CU_FALSE == f_bTestCunitMallocActive) {
@@ -316,7 +328,7 @@ void* CU_realloc(void *ptr, size_t size, unsigned int uiLine, const char* szFile
   pVoid = realloc(ptr, size);
 
   if (NULL != pVoid) {
-    allocate_memory(size, pVoid, uiLine, szFileName);
+    allocate_memory(size, pVoid, uiLine, szFileName, szFunction);
   }
 
   return pVoid;
@@ -365,8 +377,10 @@ void CU_dump_memory_usage(const char* szFilename)
     while (NULL != pTempEvent) {
       fprintf(pFile, "\n      <MD_EVENT_RECORD>");
       fprintf(pFile, "\n        <MD_SIZE> %u </MD_SIZE>", (unsigned int)pTempEvent->Size);
+      fprintf(pFile, "\n        <MD_ALLOC_FUNCTION> %s </MD_ALLOC_FUNCTION>", pTempEvent->AllocFunction);
       fprintf(pFile, "\n        <MD_ALLOC_FILE> %s </MD_ALLOC_FILE>", pTempEvent->AllocFilename);
       fprintf(pFile, "\n        <MD_ALLOC_LINE> %u </MD_ALLOC_LINE>", pTempEvent->AllocLine);
+      fprintf(pFile, "\n        <MD_DEALLOC_FUNCTION> %s </MD_DEALLOC_FUNCTION>", pTempEvent->DeallocFunction);
       fprintf(pFile, "\n        <MD_DEALLOC_FILE> %s </MD_DEALLOC_FILE>", pTempEvent->DeallocFilename);
       fprintf(pFile, "\n        <MD_DEALLOC_LINE> %u </MD_DEALLOC_LINE>", pTempEvent->DeallocLine);
       fprintf(pFile, "\n      </MD_EVENT_RECORD>");

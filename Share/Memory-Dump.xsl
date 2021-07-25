@@ -48,8 +48,10 @@
 		<xsl:for-each select="MD_EVENT_RECORD">
 			<tr>
 				<td> <xsl:value-of select="$ptr"/> </td>
+				<td> <xsl:value-of select="MD_ALLOC_FUNCTION"/> </td>
 				<td> <xsl:value-of select="MD_ALLOC_FILE"/> </td>
 				<td> <xsl:value-of select="MD_ALLOC_LINE"/> </td>
+				<td> <xsl:value-of select="MD_DEALLOC_FUNCTION"/> </td>
 				<td> <xsl:value-of select="MD_DEALLOC_FILE"/> </td>
 				<td> <xsl:value-of select="MD_DEALLOC_LINE"/> </td>
 				<td> <xsl:value-of select="MD_SIZE"/> </td>
