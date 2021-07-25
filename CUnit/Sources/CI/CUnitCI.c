@@ -100,7 +100,7 @@ static void setup_handlers(void) {
     func.suite_setup_failed = cu_ci_suite_setup_failed;
     CCU_MessageHandler_Add(CUMSG_SUITE_SETUP_FAILED, func);
 
-    func.suite_setup_failed = cu_ci_suite_cleanup_failed;
+    func.suite_teardown_failed = cu_ci_suite_cleanup_failed;
     CCU_MessageHandler_Add(CUMSG_SUITE_TEARDOWN_FAILED, func);
 
     func.test_skipped = cu_ci_test_skipped;
