@@ -148,6 +148,17 @@ void CU_console_run_tests(void)
 /*=================================================================
  *  Static function implementation
  *=================================================================*/
+
+static int get_choice(void)
+{
+  char szTemp[256];
+  int ch;
+
+  ch = getchar();
+  IGNORE_RETURN(fgets(szTemp, 256, stdin)) /* flush any chars out of the read buffer */
+  return toupper(ch);
+}
+
 /**
  *  Main loop for console interface.
  *  Displays actions and responds based on user imput.  If pRegistry
@@ -160,7 +171,6 @@ static void console_registry_level_run(CU_pTestRegistry pRegistry)
   int chChoice;
   CU_pSuite pSuite = NULL;
   CU_STATUS eStatus = CU_STATUS_CONTINUE;
-  char szTemp[256];
 
   while (CU_STATUS_CONTINUE == eStatus)
   {
@@ -168,8 +178,7 @@ static void console_registry_level_run(CU_pTestRegistry pRegistry)
                     _("***************** CUNIT CONSOLE - MAIN MENU ******************************"),
                     _("(R)un  (S)elect  (L)ist  (A)ctivate  (F)ailures  (O)ptions  (H)elp  (Q)uit"),
                     _("Enter command: "));
-    chChoice = toupper(getchar());
-    IGNORE_RETURN(fgets(szTemp, 256, stdin))      /* flush any chars out of the read buffer */
+    chChoice = get_choice();
 
     if (chChoice == _("R")[0]) {
       console_run_all_tests(pRegistry);
@@ -236,7 +245,6 @@ static CU_STATUS console_suite_level_run(CU_pSuite pSuite)
   int chChoice;
   CU_pTest pTest = NULL;
   CU_STATUS eStatus = CU_STATUS_CONTINUE;
-  char szTemp[256];
 
   assert(NULL != pSuite);
   assert(NULL != pSuite->pName);
@@ -247,8 +255,7 @@ static CU_STATUS console_suite_level_run(CU_pSuite pSuite)
                     _("***************** CUNIT CONSOLE - SUITE MENU ***************************"),
                     _("(R)un (S)elect (L)ist (A)ctivate (F)ailures (U)p (O)ptions (H)elp (Q)uit"),
                     _("Enter command: "));
-    chChoice = toupper(getchar());
-    IGNORE_RETURN(fgets(szTemp, 256, stdin))      /* flush any chars out of the read buffer */
+    chChoice = get_choice();
 
     if (chChoice == _("R")[0]) {
       console_run_suite(pSuite);
@@ -316,7 +323,6 @@ static CU_STATUS console_set_options_run(void)
 {
   int chChoice;
   CU_STATUS eStatus = CU_STATUS_CONTINUE;
-  char szTemp[256];
 
   while (CU_STATUS_CONTINUE == eStatus) {
     fprintf(stdout, "\n%s\n",
@@ -326,8 +332,7 @@ static CU_STATUS console_set_options_run(void)
     fprintf(stdout, "\n********************************************************************\n");
     fprintf(stdout, "%s",
                     _("Enter number of option to change : "));
-    chChoice = getchar();
-    IGNORE_RETURN(fgets(szTemp, 256, stdin))      /* flush any chars out of the read buffer */
+    chChoice = get_choice();
 
     switch (tolower(chChoice)) {
       case '1':
