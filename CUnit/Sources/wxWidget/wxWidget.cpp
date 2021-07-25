@@ -861,8 +861,9 @@ void TopFrame::WriteFailureRecords(wxTextCtrl *textctrl,
                 << (((NULL != pFailure->pTest) &&
                      (NULL != pFailure->pTest->pName)) ? pFailure->pTest->pName : "")
                 << "\n" << _("Source: ") 
-                << ((NULL != pFailure->strFileName) ? pFailure->strFileName : "")
-                << "::" << (long)(pFailure->uiLineNumber) << "\n\n";
+                << ((NULL != pFailure->strFunction) ? pFailure->strFunction : "")
+                << ":" << ((NULL != pFailure->strFileName) ? pFailure->strFileName : "")
+                << ":" << (long)(pFailure->uiLineNumber) << "\n\n";
       pFailure = pFailure->pNext;
     }
   }

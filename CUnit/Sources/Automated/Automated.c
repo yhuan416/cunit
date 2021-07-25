@@ -379,12 +379,14 @@ static void automated_test_complete_message_handler(const CU_pTest pTest,
               "        <CUNIT_RUN_TEST_RECORD> \n"
               "          <CUNIT_RUN_TEST_FAILURE> \n"
               "            <TEST_NAME> %s </TEST_NAME> \n"
+              "            <FUNCTION> %s </FUNCTION> \n"
               "            <FILE_NAME> %s </FILE_NAME> \n"
               "            <LINE_NUMBER> %u </LINE_NUMBER> \n"
               "            <CONDITION> %s </CONDITION> \n"
               "          </CUNIT_RUN_TEST_FAILURE> \n"
               "        </CUNIT_RUN_TEST_RECORD> \n",
               pTest->pName,
+              (NULL != pTempFailure->strFunction) ? pTempFailure->strFunction : "",
               (NULL != pTempFailure->strFileName) ? pTempFailure->strFileName : "",
               pTempFailure->uiLineNumber,
               szTemp);

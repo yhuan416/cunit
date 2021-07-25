@@ -195,8 +195,10 @@ static void format_testcase(cu_dstr *dst, const char *esc_name, CU_pSuite suite,
         skipreason = _escape_string(suite->pSkipReason);
       _dstr_puts(dst, "      <skipped reason=\"suite skipped\">");
       _dstr_putf(dst,
+                 "Function: %s\n"
                  "File: %s\n"
                  "Line: %u\n",
+                 suite->pSkipFunction,
                  suite->pSkipFile,
                  suite->uiSkipLine
       );
@@ -205,8 +207,10 @@ static void format_testcase(cu_dstr *dst, const char *esc_name, CU_pSuite suite,
         skipreason = _escape_string(test->pSkipReason);
       _dstr_puts(dst, "      <skipped reason=\"test skipped\">");
       _dstr_putf(dst,
+                 "Function: %s\n"
                  "File: %s\n"
                  "Line: %u\n",
+                 test->pSkipFunction,
                  test->pSkipFile,
                  test->uiSkipLine
       );
@@ -232,10 +236,12 @@ static void format_testcase(cu_dstr *dst, const char *esc_name, CU_pSuite suite,
         break;
       case CUF_AssertFailed:
         _dstr_putf(&failure_msg,
+                   "Function: %s\n"
                    "File: %s\n"
                    "Line: %u\n"
                    "Assertion Failed:\n"
                    "Condition: '%s'\n\n",
+                   failure->strFunction,
                    failure->strFileName,
                    failure->uiLineNumber,
                    failure->strCondition

@@ -1120,7 +1120,8 @@ static void show_failures(void)
   for (i = 0 ; pFailure ; pFailure = pFailure->pNext, i++) {
     char szTemp[STRING_LENGTH];
 
-    snprintf(szTemp, STRING_LENGTH, "%d. %s:%d : (%s : %s) : %s", i + 1,
+    snprintf(szTemp, STRING_LENGTH, "%d. %s:%s:%d : (%s : %s) : %s", i + 1,
+        ((NULL != pFailure->strFunction) ? pFailure->strFunction : ""),
         ((NULL != pFailure->strFileName) ? pFailure->strFileName : ""),
         pFailure->uiLineNumber,
         (((NULL != pFailure->pSuite) && (NULL != pFailure->pSuite->pName))

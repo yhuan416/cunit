@@ -123,6 +123,7 @@ typedef struct CU_Test
   double          dEnded;     /** clock time test ended */
 
   const char*     pSkipReason;
+  const char*     pSkipFunction;
   const char*     pSkipFile;
   unsigned int    uiSkipLine;
 
@@ -186,6 +187,7 @@ typedef struct CU_Suite
   CU_BOOL           fInTestClean;    /**< Flag set if we are running a test teardown function */
 
   const char*       pSkipReason;
+  const char*       pSkipFunction;
   const char*       pSkipFile;
   unsigned int      uiSkipLine;
 

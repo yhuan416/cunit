@@ -105,9 +105,13 @@
 			<td colspan="4" bgcolor="#ff9090">
 				<table width="100%">
 					<tr>
+						<th width="10%"> Function </th>
+						<td width="20%" bgcolor="#e0eee0">
+							<xsl:value-of select="FUNCTION"/>
 						<th width="15%"> File Name </th>
-						<td width="50%" bgcolor="#e0eee0">
+						<td width="25%" bgcolor="#e0eee0">
 							<xsl:value-of select="FILE_NAME"/>
+						</td>
 						</td>
 						<th width="20%"> Line Number </th>
 						<td width="10%" bgcolor="#e0eee0">

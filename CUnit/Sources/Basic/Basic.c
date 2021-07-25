@@ -137,7 +137,8 @@ void CU_basic_show_failures(CU_pFailureRecord pFailure)
   int i;
 
   for (i = 1 ; (NULL != pFailure) ; pFailure = pFailure->pNext, i++) {
-    fprintf(stdout, "\n  %d. %s:%u  - %s", i,
+    fprintf(stdout, "\n  %d. %s:%s:%u  - %s", i,
+        (NULL != pFailure->strFunction) ? pFailure->strFunction : "",
         (NULL != pFailure->strFileName) ? pFailure->strFileName : "",
         pFailure->uiLineNumber,
         (NULL != pFailure->strCondition) ? pFailure->strCondition : "");
@@ -289,7 +290,8 @@ static void basic_test_complete_message_handler(const CU_pTest pTest,
     }
     if (CU_BRM_SILENT != f_run_mode) {
       for (i = 1 ; (NULL != pFailure) ; pFailure = pFailure->pNext, i++) {
-        fprintf(stdout, "\n    %d. %s:%u  - %s", i,
+        fprintf(stdout, "\n    %d. %s:%s:%u  - %s", i,
+            (NULL != pFailure->strFunction) ? pFailure->strFunction : "",
             (NULL != pFailure->strFileName) ? pFailure->strFileName : "",
             pFailure->uiLineNumber,
             (NULL != pFailure->strCondition) ? pFailure->strCondition : "");

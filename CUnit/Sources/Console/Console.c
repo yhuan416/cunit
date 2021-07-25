@@ -601,10 +601,12 @@ static void show_failures(void)
     fprintf(stdout, "\n%s",
                     _("--------------- Test Run Failures -------------------------"));
     fprintf(stdout, "\n%s\n",
-                    _("   src_file:line# : (suite:test) : failure_condition"));
+                    _("   func:file:line# : (suite:test) : failure_condition"));
 
     for (i = 1 ; (NULL != pFailure) ; pFailure = pFailure->pNext, i++) {
-      fprintf(stdout, "\n%d. %s:%u : (%s : %s) : %s", i,
+      fprintf(stdout, "\n%d. %s:%s:%u : (%s : %s) : %s", i,
+          (NULL != pFailure->strFunction)
+              ? pFailure->strFunction : "",
           (NULL != pFailure->strFileName)
               ? pFailure->strFileName : "",
           pFailure->uiLineNumber,

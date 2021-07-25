@@ -127,6 +127,7 @@ static void         add_failure(CU_pFailureRecord* ppFailure,
                                 unsigned int uiLineNumber,
                                 const char *szCondition,
                                 const char *szFileName,
+                                const char *szFunction,
                                 CU_pSuite pSuite,
                                 CU_pTest pTest);
 static CU_pFailureRecord get_failure_tail(CU_pFailureRecord pFailureRecord);
@@ -142,9 +143,6 @@ CU_BOOL CU_assertImplementation(CU_BOOL bValue,
                                 const char *strFunction,
                                 CU_BOOL bFatal)
 {
-  /* not used in current implementation - stop compiler warning */
-  CU_UNREFERENCED_PARAMETER(strFunction);
-
   /* these should always be non-NULL (i.e. a test run is in progress) */
   assert(NULL != f_pCurSuite);
 
@@ -152,7 +150,7 @@ CU_BOOL CU_assertImplementation(CU_BOOL bValue,
   if (CU_FALSE == bValue) {
     ++f_run_summary.nAssertsFailed;
     add_failure(&f_failure_list, &f_run_summary, CUF_AssertFailed,
-                uiLine, strCondition, strFile, f_pCurSuite, f_pCurTest);
+                uiLine, strCondition, strFile, strFunction, f_pCurSuite, f_pCurTest);
 
     if(f_pCurTest) {
       if ((CU_TRUE == bFatal) && (NULL != f_pCurTest->pJumpBuf)) {
@@ -174,9 +172,6 @@ void CU_SkipImplementation(CU_BOOL value,
                            const char *strFile,
                            const char *strFunction)
 {
-  /* not used in current implementation - stop compiler warning */
-  CU_UNREFERENCED_PARAMETER(strFunction);
-
   /* these should always be non-NULL (i.e. a test run is in progress) */
   assert(NULL != f_pCurSuite);
 
@@ -190,6 +185,7 @@ void CU_SkipImplementation(CU_BOOL value,
       f_pCurSuite->fSkipped = CU_TRUE;
       f_pCurSuite->fActive = CU_FALSE;
 
+      f_pCurSuite->pSkipFunction = strFunction;
       f_pCurSuite->pSkipFile = strFile;
       f_pCurSuite->uiSkipLine = uiLine;
       f_pCurSuite->pSkipReason = strCondition;
@@ -199,6 +195,7 @@ void CU_SkipImplementation(CU_BOOL value,
       ++f_run_summary.nTestsSkipped;
       f_pCurTest->fSkipped = CU_TRUE;
       f_pCurTest->fActive = CU_FALSE;
+      f_pCurTest->pSkipFunction = strFunction;
       f_pCurTest->pSkipFile = strFile;
       f_pCurTest->uiSkipLine = uiLine;
       f_pCurTest->pSkipReason = strCondition;
@@ -553,7 +550,7 @@ CU_ErrorCode CU_run_test(CU_pSuite pSuite, CU_pTest pTest)
     f_run_summary.nSuitesInactive++;
     if (CU_FALSE != f_failure_on_inactive) {
       add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInactive,
-                  0, _("Suite inactive"), __FILE__, pSuite, NULL);
+                  0, _("Suite inactive"), __FILE__, CU_FUNC, pSuite, NULL);
     }
     result = CUE_SUITE_INACTIVE;
   }
@@ -581,7 +578,7 @@ CU_ErrorCode CU_run_test(CU_pSuite pSuite, CU_pTest pTest)
       f_run_summary.nSuitesFailed++;
       add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
                   _("Suite Initialization failed - Suite Skipped"),
-                  __FILE__, pSuite, NULL);
+                  __FILE__, CU_FUNC, pSuite, NULL);
       result = setupresult = CUE_SINIT_FAILED;
     }
 
@@ -597,7 +594,7 @@ CU_ErrorCode CU_run_test(CU_pSuite pSuite, CU_pTest pTest)
         CCU_MessageHandler_Run(CUMSG_SUITE_TEARDOWN_FAILED, pSuite, NULL, NULL);
         f_run_summary.nSuitesFailed++;
         add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
-                    0, _("Suite cleanup failed."), __FILE__, pSuite, NULL);
+                    0, _("Suite cleanup failed."), __FILE__, CU_FUNC, pSuite, NULL);
         result = CUE_SCLEAN_FAILED;
       }
     }
@@ -733,6 +730,7 @@ CU_EXPORT char * CU_get_run_results_string(void)
  *  @param uiLineNumber Line number of the failure, if applicable.
  *  @param szCondition  Description of failure condition
  *  @param szFileName   Name of file, if applicable
+ *  @param szFunction   Name of function, if applicable
  *  @param pSuite       The suite being run at time of failure
  *  @param pTest        The test being run at time of failure
  */
@@ -742,6 +740,7 @@ static void add_failure(CU_pFailureRecord* ppFailure,
                         unsigned int uiLineNumber,
                         const char *szCondition,
                         const char *szFileName,
+                        const char *szFunction,
                         CU_pSuite pSuite,
                         CU_pTest pTest)
 {
@@ -756,7 +755,9 @@ static void add_failure(CU_pFailureRecord* ppFailure,
   }
 
   pFailureNew->strFileName = NULL;
+  pFailureNew->strFunction = NULL;
   pFailureNew->strCondition = NULL;
+
   if (NULL != szFileName) {
     pFailureNew->strFileName = (char*)CU_MALLOC(strlen(szFileName) + 1);
     if(NULL == pFailureNew->strFileName) {
@@ -766,11 +767,26 @@ static void add_failure(CU_pFailureRecord* ppFailure,
     strcpy(pFailureNew->strFileName, szFileName);
   }
 
+  if (NULL != szFunction) {
+    pFailureNew->strFunction = (char*)CU_MALLOC(strlen(szFunction) + 1);
+    if(NULL == pFailureNew->strFunction) {
+      if(NULL != pFailureNew->strFileName) {
+        CU_FREE(pFailureNew->strFileName);
+      }
+      CU_FREE(pFailureNew);
+      return;
+    }
+    strcpy(pFailureNew->strFunction, szFunction);
+  }
+
   if (NULL != szCondition) {
     pFailureNew->strCondition = (char*)CU_MALLOC(strlen(szCondition) + 1);
     if (NULL == pFailureNew->strCondition) {
       if(NULL != pFailureNew->strFileName) {
         CU_FREE(pFailureNew->strFileName);
+      }
+      if(NULL != pFailureNew->strFunction) {
+        CU_FREE(pFailureNew->strFunction);
       }
       CU_FREE(pFailureNew);
       return;
@@ -860,6 +876,10 @@ static void cleanup_failure_list(CU_pFailureRecord* ppFailure)
       CU_FREE(pCurFailure->strCondition);
     }
 
+    if (NULL != pCurFailure->strFunction) {
+      CU_FREE(pCurFailure->strFunction);
+    }
+
     if (NULL != pCurFailure->strFileName) {
       CU_FREE(pCurFailure->strFileName);
     }
@@ -936,7 +956,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
           pRunSummary->nSuitesFailed++;
           add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
                       _("Suite Initialization failed - Suite Skipped"),
-                      __FILE__, pSuite, pSuite->pInitializeFuncTest);
+                      __FILE__, CU_FUNC, pSuite, pSuite->pInitializeFuncTest);
           result = CUE_SINIT_FAILED;
         }
       }
@@ -963,7 +983,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
           f_run_summary.nTestsInactive++;
           if (CU_FALSE != f_failure_on_inactive) {
             add_failure(&f_failure_list, &f_run_summary, CUF_TestInactive,
-                        0, _("Test inactive"), __FILE__, pSuite, pTest);
+                        0, _("Test inactive"), __FILE__, CU_FUNC, pSuite, pTest);
             result = CUE_TEST_INACTIVE;
           } else {
             pSuite->uiNumberOfTestsFailed++;
@@ -991,7 +1011,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
           pSuite->fCleanupError = CU_TRUE;
           pRunSummary->nSuitesFailed++;
           add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
-                      0, _("Suite cleanup failed."), __FILE__, pSuite, pSuite->pCleanupFuncTest);
+                      0, _("Suite cleanup failed."), __FILE__, CU_FUNC, pSuite, pSuite->pCleanupFuncTest);
         }
       }
     }
@@ -1002,7 +1022,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
     f_run_summary.nSuitesInactive++;
     if (CU_FALSE != f_failure_on_inactive) {
       add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInactive,
-                  0, _("Suite inactive"), __FILE__, pSuite, NULL);
+                  0, _("Suite inactive"), __FILE__, CU_FUNC, pSuite, NULL);
       result = CUE_SUITE_INACTIVE;
     }
     /* Call the notification function for the tests if there is one */
@@ -1108,7 +1128,7 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
 
     if (CU_FALSE != f_failure_on_inactive) {
       add_failure(&f_failure_list, &f_run_summary, CUF_TestInactive,
-                  0, _("Test inactive"), __FILE__, f_pCurSuite, f_pCurTest);
+                  0, _("Test inactive"), __FILE__, CU_FUNC, f_pCurSuite, f_pCurTest);
     }
     result = CUE_TEST_INACTIVE;
   }
@@ -2954,6 +2974,7 @@ static void test_CU_assertImplementation(void)
     pFailure1 = CU_get_failure_list();
     TEST(102 == pFailure1->uiLineNumber);
     TEST(!strcmp("dummy2.c", pFailure1->strFileName));
+    TEST(!strcmp("dummy_func2", pFailure1->strFunction));
     TEST(!strcmp("Something happened 2.", pFailure1->strCondition));
     TEST(&dummy_test == pFailure1->pTest);
     TEST(&dummy_suite == pFailure1->pSuite);
@@ -2963,6 +2984,7 @@ static void test_CU_assertImplementation(void)
     pFailure2 = pFailure1->pNext;
     TEST(103 == pFailure2->uiLineNumber);
     TEST(!strcmp("dummy3.c", pFailure2->strFileName));
+    TEST(!strcmp("dummy_func3", pFailure2->strFunction));
     TEST(!strcmp("Something happened 3.", pFailure2->strCondition));
     TEST(&dummy_test == pFailure2->pTest);
     TEST(&dummy_suite == pFailure2->pSuite);
@@ -2972,6 +2994,7 @@ static void test_CU_assertImplementation(void)
     pFailure3 = pFailure2->pNext;
     TEST(104 == pFailure3->uiLineNumber);
     TEST(!strcmp("dummy4.c", pFailure3->strFileName));
+    TEST(!strcmp("dummy_func4", pFailure3->strFunction));
     TEST(!strcmp("Something happened 4.", pFailure3->strCondition));
     TEST(&dummy_test == pFailure3->pTest);
     TEST(&dummy_suite == pFailure3->pSuite);
@@ -3021,18 +3044,19 @@ static void test_add_failure(void)
 
   /* test under memory exhaustion */
   test_cunit_deactivate_malloc();
-  add_failure(&pFailure1, &run_summary, CUF_AssertFailed, 100, "condition 0", "file0.c", &suite1, &test1);
+  add_failure(&pFailure1, &run_summary, CUF_AssertFailed, 100, "condition 0", "file0.c", "func0", &suite1, &test1);
   TEST(NULL == pFailure1);
   TEST(0 == run_summary.nFailureRecords);
   test_cunit_activate_malloc();
 
   /* normal operation */
-  add_failure(&pFailure1, &run_summary, CUF_AssertFailed, 101, "condition 1", "file1.c", &suite1, &test1);
+  add_failure(&pFailure1, &run_summary, CUF_AssertFailed, 101, "condition 1", "file1.c", "func1", &suite1, &test1);
   TEST(1 == run_summary.nFailureRecords);
   if (TEST(NULL != pFailure1)) {
     TEST(101 == pFailure1->uiLineNumber);
     TEST(!strcmp("condition 1", pFailure1->strCondition));
     TEST(!strcmp("file1.c", pFailure1->strFileName));
+    TEST(!strcmp("func1", pFailure1->strFunction));
     TEST(&test1 == pFailure1->pTest);
     TEST(&suite1 == pFailure1->pSuite);
     TEST(NULL == pFailure1->pNext);
@@ -3042,12 +3066,13 @@ static void test_add_failure(void)
     TEST(test_cunit_get_n_allocations(pFailure1) != test_cunit_get_n_deallocations(pFailure1));
   }
 
-  add_failure(&pFailure1, &run_summary, CUF_AssertFailed, 102, "condition 2", "file2.c", NULL, &test1);
+  add_failure(&pFailure1, &run_summary, CUF_AssertFailed, 102, "condition 2", "file2.c", "func2", NULL, &test1);
   TEST(2 == run_summary.nFailureRecords);
   if (TEST(NULL != pFailure1)) {
     TEST(101 == pFailure1->uiLineNumber);
     TEST(!strcmp("condition 1", pFailure1->strCondition));
     TEST(!strcmp("file1.c", pFailure1->strFileName));
+    TEST(!strcmp("func1", pFailure1->strFunction));
     TEST(&test1 == pFailure1->pTest);
     TEST(&suite1 == pFailure1->pSuite);
     TEST(NULL != pFailure1->pNext);
@@ -3060,6 +3085,7 @@ static void test_add_failure(void)
       TEST(102 == pFailure2->uiLineNumber);
       TEST(!strcmp("condition 2", pFailure2->strCondition));
       TEST(!strcmp("file2.c", pFailure2->strFileName));
+      TEST(!strcmp("func2", pFailure2->strFunction));
       TEST(&test1 == pFailure2->pTest);
       TEST(NULL == pFailure2->pSuite);
       TEST(NULL == pFailure2->pNext);

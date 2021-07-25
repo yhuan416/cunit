@@ -93,6 +93,7 @@ typedef struct CU_FailureRecord
   CU_FailureType  type;           /**< Failure type. */
   unsigned int    uiLineNumber;   /**< Line number of failure. */
   char*           strFileName;    /**< Name of file where failure occurred. */
+  char*           strFunction;    /**< Function of failure. */
   char*           strCondition;   /**< Test condition which failed. */
   CU_pTest        pTest;          /**< Test containing failure. */
   CU_pSuite       pSuite;         /**< Suite containing test having failure. */
@@ -514,7 +515,7 @@ CU_EXPORT void CU_SkipImplementation(CU_BOOL bValue,
 
 /** Skip the current suite or test if true. */
 #define CU_SKIP_IF(value) \
-  { CU_SkipImplementation((value), __LINE__, ("CU_SKIP_IF(" #value ")"), __FILE__, ""); }
+  { CU_SkipImplementation((value), __LINE__, ("CU_SKIP_IF(" #value ")"), __FILE__, CU_FUNC); }
 
 
 
