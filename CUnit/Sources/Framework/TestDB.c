@@ -614,17 +614,20 @@ CU_ErrorCode CU_register_nsuites(int suite_count, ...)
         if (NULL != (pSuite = CU_add_suite_with_setup_and_teardown(pSuiteItem->pName, pSuiteItem->pInitFunc, pSuiteItem->pCleanupFunc, pSuiteItem->pSetUpFunc, pSuiteItem->pTearDownFunc))) {
           for (pTestItem = pSuiteItem->pTests; NULL != pTestItem->pName; pTestItem++) {
             if (NULL == CU_add_test(pSuite, pTestItem->pName, pTestItem->pTestFunc)) {
-              return CU_get_error();
+              goto out;
             }
           }
         }
         else {
-          return CU_get_error();
+          goto out;
         }
       }
     }
   }
-	return CU_get_error();
+
+out:
+  va_end(argptr);
+  return CU_get_error();
 }
 
 /*------------------------------------------------------------------------*/
