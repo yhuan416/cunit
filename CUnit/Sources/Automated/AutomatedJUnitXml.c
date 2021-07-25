@@ -135,10 +135,10 @@ static int _dstr_putf(cu_dstr *dst, const char* format, ...) {
 
 
 static char* _escape_string(const char* instr) {
-  char *sztmp = (char *)malloc((CU_translated_strlen(instr) + 1));
+  size_t len = CU_translated_strlen(instr) + 1;
+  char *sztmp = (char *)malloc(len);
   assert (sztmp);
-  memset(sztmp, 0, sizeof(*sztmp));
-  CU_translate_special_characters(instr, sztmp, (CU_translated_strlen(instr) + 1));
+  CU_translate_special_characters(instr, sztmp, len);
   return sztmp;
 }
 
