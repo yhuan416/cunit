@@ -553,7 +553,7 @@ CU_ErrorCode CU_run_test(CU_pSuite pSuite, CU_pTest pTest)
     f_run_summary.nSuitesInactive++;
     if (CU_FALSE != f_failure_on_inactive) {
       add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInactive,
-                  0, _("Suite inactive"), _("CUnit System"), pSuite, NULL);
+                  0, _("Suite inactive"), __FILE__, pSuite, NULL);
     }
     result = CUE_SUITE_INACTIVE;
   }
@@ -581,7 +581,7 @@ CU_ErrorCode CU_run_test(CU_pSuite pSuite, CU_pTest pTest)
       f_run_summary.nSuitesFailed++;
       add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
                   _("Suite Initialization failed - Suite Skipped"),
-                  _("CUnit System"), pSuite, NULL);
+                  __FILE__, pSuite, NULL);
       result = setupresult = CUE_SINIT_FAILED;
     }
 
@@ -597,7 +597,7 @@ CU_ErrorCode CU_run_test(CU_pSuite pSuite, CU_pTest pTest)
         CCU_MessageHandler_Run(CUMSG_SUITE_TEARDOWN_FAILED, pSuite, NULL, NULL);
         f_run_summary.nSuitesFailed++;
         add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
-                    0, _("Suite cleanup failed."), _("CUnit System"), pSuite, NULL);
+                    0, _("Suite cleanup failed."), __FILE__, pSuite, NULL);
         result = CUE_SCLEAN_FAILED;
       }
     }
@@ -936,7 +936,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
           pRunSummary->nSuitesFailed++;
           add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInitFailed, 0,
                       _("Suite Initialization failed - Suite Skipped"),
-                      _("CUnit System"), pSuite, pSuite->pInitializeFuncTest);
+                      __FILE__, pSuite, pSuite->pInitializeFuncTest);
           result = CUE_SINIT_FAILED;
         }
       }
@@ -963,7 +963,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
           f_run_summary.nTestsInactive++;
           if (CU_FALSE != f_failure_on_inactive) {
             add_failure(&f_failure_list, &f_run_summary, CUF_TestInactive,
-                        0, _("Test inactive"), _("CUnit System"), pSuite, pTest);
+                        0, _("Test inactive"), __FILE__, pSuite, pTest);
             result = CUE_TEST_INACTIVE;
           } else {
             pSuite->uiNumberOfTestsFailed++;
@@ -991,7 +991,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
           pSuite->fCleanupError = CU_TRUE;
           pRunSummary->nSuitesFailed++;
           add_failure(&f_failure_list, &f_run_summary, CUF_SuiteCleanupFailed,
-                      0, _("Suite cleanup failed."), _("CUnit System"), pSuite, pSuite->pCleanupFuncTest);
+                      0, _("Suite cleanup failed."), __FILE__, pSuite, pSuite->pCleanupFuncTest);
         }
       }
     }
@@ -1002,7 +1002,7 @@ static CU_ErrorCode run_single_suite(CU_pSuite pSuite, CU_pRunSummary pRunSummar
     f_run_summary.nSuitesInactive++;
     if (CU_FALSE != f_failure_on_inactive) {
       add_failure(&f_failure_list, &f_run_summary, CUF_SuiteInactive,
-                  0, _("Suite inactive"), _("CUnit System"), pSuite, NULL);
+                  0, _("Suite inactive"), __FILE__, pSuite, NULL);
       result = CUE_SUITE_INACTIVE;
     }
     /* Call the notification function for the tests if there is one */
@@ -1108,7 +1108,7 @@ static CU_ErrorCode run_single_test(CU_pTest pTest, CU_pRunSummary pRunSummary)
 
     if (CU_FALSE != f_failure_on_inactive) {
       add_failure(&f_failure_list, &f_run_summary, CUF_TestInactive,
-                  0, _("Test inactive"), _("CUnit System"), f_pCurSuite, f_pCurTest);
+                  0, _("Test inactive"), __FILE__, f_pCurSuite, f_pCurTest);
     }
     result = CUE_TEST_INACTIVE;
   }
