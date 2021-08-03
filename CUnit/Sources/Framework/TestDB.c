@@ -573,6 +573,26 @@ unsigned int CU_get_test_pos_by_name(CU_pSuite pSuite, const char *strName)
   return result;
 }
 
+/*------------------------------------------------------------------------*/
+CU_ErrorCode CU_set_all_active(CU_BOOL fNewActive)
+{
+  CU_pSuite pSuite;
+  CU_pTest pTest;
+
+  if (NULL == f_pTestRegistry) {
+    return CUE_NOREGISTRY;
+  }
+
+  for (pSuite = f_pTestRegistry->pSuite; NULL != pSuite; pSuite = pSuite->pNext) {
+    pSuite->fActive = fNewActive;
+    for (pTest = pSuite->pTest; NULL != pTest; pTest = pTest->pNext) {
+      pSuite->fActive = fNewActive;
+    }
+  }
+
+  return CUE_SUCCESS;
+}
+
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 /*  This section is based conceptually on code
  *  Copyright (C) 2004  Aurema Pty Ltd.

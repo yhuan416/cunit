@@ -63,6 +63,7 @@ CU_register_suites
 CU_run_all_tests
 CU_run_suite
 CU_run_test
+CU_set_all_active
 CU_set_all_test_complete_handler
 CU_set_error
 CU_set_error_action

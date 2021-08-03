@@ -682,6 +682,21 @@ unsigned int CU_get_test_pos_by_name(CU_pSuite pSuite, const char *strName);
 #define CU_ADD_TEST(suite, test) (CU_add_test(suite, #test, (CU_TestFunc)test))
 /**< Shortcut macro for adding a test to a suite. */
 
+CU_EXPORT
+CU_ErrorCode CU_set_all_active(CU_BOOL fNewActive);
+/**<
+ *  Activates or deactivates all tests.
+ *  Only activated tests can be executed during a test run.
+ *  By default a test is active upon creation, but can be deactvated
+ *  all by passing it along with CU_FALSE to this function. All test
+ *  can be reactivated by passing it along with CU_TRUE.
+ *
+ *  @param fNewActive If CU_TRUE then all tests will be activated;
+ *                    if CU_FALSE all tests will be deactivated.
+ *  @return Returns CUE_NOREGISTRY if CU_initialize_registry
+ *          isn't called, CUE_SUCCESS if all is well.
+*/
+
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 /*  This section is based conceptually on code
  *  Copyright (C) 2004  Aurema Pty Ltd.
