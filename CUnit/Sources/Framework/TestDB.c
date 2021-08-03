@@ -586,7 +586,7 @@ CU_ErrorCode CU_set_all_active(CU_BOOL fNewActive)
   for (pSuite = f_pTestRegistry->pSuite; NULL != pSuite; pSuite = pSuite->pNext) {
     pSuite->fActive = fNewActive;
     for (pTest = pSuite->pTest; NULL != pTest; pTest = pTest->pNext) {
-      pSuite->fActive = fNewActive;
+      pTest->fActive = fNewActive;
     }
   }
 
