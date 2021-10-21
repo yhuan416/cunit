@@ -243,9 +243,10 @@ static CU_ErrorCode initialize_result_file(const char* szFilename)
     FILE *outfile = fopen(szFilename, "w");
     if (!outfile) {
       CU_set_error(CUE_FOPEN_FAILED);
-    }
-    if (fclose(outfile)){
-      CU_set_error(CUE_FCLOSE_FAILED);
+    } else {
+      if (fclose(outfile)){
+        CU_set_error(CUE_FCLOSE_FAILED);
+      }
     }
     return CU_get_error();
   }
