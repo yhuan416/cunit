@@ -1,6 +1,3 @@
-variables:
-  WINDOWS_CMAKE_IMAGE: cunity/windows-1803-cmake:latest
-
 
 stages:
   - build
@@ -8,9 +5,8 @@ stages:
   - results
   - release
 
-.cunit-build-template: &cunit-build
+.cunit-build-template: &cunit-.build
   script:
-    - git clean -f -d -x
     - mkdir build-${CI_JOB_NAME}
     - cd build-${CI_JOB_NAME}
     - cmake -G "Unix Makefiles" ..
@@ -32,17 +28,8 @@ stages:
       - build-*/Examples/CI/*-Results.xml
       - build-*/Tests/*-Results.xml
 
-cunit-ubuntu-19.04-power9:
-  <<: *cunit-build
-  stage: build
-  tags:
-    - ubuntu-19.04-power9
-  when: manual
-  only:
-    variables:
-      - $GITLAB_LINUX_POWER9
 
-cunit-ubuntu-18.04-notests:
+.cunit-ubuntu-18.04-notests:
   stage: build
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
   script:
@@ -52,45 +39,16 @@ cunit-ubuntu-18.04-notests:
     - cmake --build .
     - find . -type f
 
-cunit-ubuntu-18.04:
+cunit-ubuntu-20.04:
   <<: *cunit-build
   stage: build
-  image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
+  image: ubuntu:20.04
+  before_script:
+    - apt-get update
+    - apt-get install -y cmake build-essential
 
-cunit-ubuntu-17.10: 
-  <<: *cunit-build
-  stage: build
-  image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-17.10:master
 
-cunit-solaris-amd64-gcc8:
-  <<: *cunit-build
-  variables:
-    CC: /usr/bin/gcc
-    CXX: /usr/bin/g++
-  stage: build
-  tags:
-    - solaris-11-amd64-gcc8
-  except:
-    - schedules
-  only:
-    variables:
-      - $GITLAB_SOLARIS
-
-cunit-solaris-amd64-sstudio123:
-  <<: *cunit-build
-  variables:
-    CC: /opt/solarisstudio12.3/bin/c99
-    CXX: /opt/solarisstudio12.3/bin/CC
-  stage: build
-  tags:
-    - solaris-11-amd64-sstudio123
-  except:
-    - schedules
-  only:
-    variables:
-      - $GITLAB_SOLARIS
-
-cmake-direxample-ubuntu-18.04:
+.cmake-direxample-ubuntu-18.04:
   stage: test
   needs: ["cunit-ubuntu-18.04"]
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
@@ -106,7 +64,7 @@ cmake-direxample-ubuntu-18.04:
   - cunit-ubuntu-18.04
 
 
-cmake-pkgexample-ubuntu-18.04:
+.cmake-pkgexample-ubuntu-18.04:
   stage: test
   needs: ["cunit-ubuntu-18.04"]
   image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
@@ -123,7 +81,7 @@ cmake-pkgexample-ubuntu-18.04:
   dependencies:
     - cunit-ubuntu-18.04
 
-cunit-win2019-vs2015:
+.cunit-win2019-vs2015:
   stage: build
   image: cunity/windows-2019-vs2015-cmake:master
   tags:
@@ -148,15 +106,9 @@ cunit-win2019-vs2015:
     variables:
       - $GITLAB_WIN2019
 
-results:
-  stage: results
-  image: registry.gitlab.com/cunity/linux-cmake-builders/ubuntu-18.04:master
-  script:    
-    - sh merge-results.sh
-    - junit2html --summary-matrix *-Results.xml
 
 
-pages:
+.pages:
   image: registry.gitlab.com/cunity/doxygen-image/ubuntu-18.04-doxygen:master
   stage: release
   dependencies:
