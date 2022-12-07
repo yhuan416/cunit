@@ -97,8 +97,10 @@ pages:
   needs:
     - alpine
   script:
-  - doxygen Doxyfile
-  - mv doc/html/ public/
+    - apk update
+    - apk add doxygen
+    - doxygen Doxyfile
+    - mv doc/html/ public/
   artifacts:
     paths:
     - public
