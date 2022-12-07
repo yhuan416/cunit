@@ -1,126 +1,28 @@
-stages:
-  - build
-  - test
-  - results
-  - release
-
-.cunit-build-template:
-  stage: build
-  script:
-    - mkdir build-${CI_JOB_NAME}
-    - cd build-${CI_JOB_NAME}
-    - cmake ..
-    - cmake --build . -j2
-    - ctest --output-on-failure    
-    - ./Examples/CI/cicd-pass-plain
-    - ./Examples/CI/cicd-pass-setupfuncs
-    - junit2html --summary-matrix Examples/CI/*-Results.xml
-    - cpack -G TGZ CUnit
-  artifacts:
-    paths:
-    - CUnit/CUnit/CUnitCI.h
-    - build-*/cunit-*.tar.gz
-    - build-*/cunit-*.deb
-    - build-*/Examples/CI/*-Results.*
-    - build-*/Tests/*.xml
-    reports:
-      junit:
-      - build-*/Examples/CI/*-Results.xml
-      - build-*/Tests/*-Results.xml
-
-ubuntu2004:
-  extends:
-    - .cunit-build-template
-  image: ubuntu:20.04
-  before_script:
-    - apt-get update
-    - export DEBIAN_FRONTEND=noninteractive
-    - apt-get install -y --no-install-recommends cmake build-essential make python3-pip
-    - pip install junit2html
-
-ubuntu2004-notests:
-  extends:
-    - ubuntu2004
-  script:
-    - mkdir build-${CI_JOB_NAME}
-    - cd build-${CI_JOB_NAME}
-    - cmake .. -DCUNIT_DISABLE_TESTS=TRUE -DCUNIT_DISABLE_EXAMPLES=TRUE
-    - cmake --build . -j 2
-    - find . -type f
-
-alpine:
-  extends:
-    - .cunit-build-template
-  image: alpine:3.14
-  before_script:
-    - apk update
-    - apk add cmake gcc make libc-dev python3 py3-pip
-    - pip install junit2html
-
-
-alpine-dirbuild:
-  stage: test
-  needs:
-    - alpine
-  extends:
-    - alpine
-  script:
-  - cd CMakeExamples/CMakeSubmodule
-  - ln -s ../../. cunit-x.y.z
-  - mkdir bld
-  - cd bld
-  - cmake ..
-  - cmake --build .
-  - ./test-program
-
-
-alpine-pkgbuild:
-  stage: test
-  needs:
-    - alpine
-  extends:
-    - alpine
-  script:
-    - find . -type f -name "*.tar.gz"
-    - mkdir -p packages/cunit
-    - tar -vxf build-alpine/cunit-3.2.*.tar.gz --strip-components=1 -C packages/cunit
-    - cd CMakeExamples/CMakeFindPackage
-    - mkdir bld
-    - cd bld
-    - cmake .. -DCUnit_DIR=$(pwd)/../../../packages/cunit/CUnit/share/cmake
-    - cmake --build .
-    - ./test-program
-
-
 windows:
   stage: build
   tags:
-    - shared-windows
-    - windows
-    - windows-1809
+  - shared-windows
+  - windows
+  - windows-1809
   before_script:
-    - choco install cmake.install -y --installargs 'ADD_CMAKE_TO_PATH=System'
-    - RefreshEnv
+  - choco install cmake.install -y --installargs 'ADD_CMAKE_TO_PATH=System'
+  - RefreshEnv
   script:
-    - mkdir build-windows
-    - cd build-windows
-    - c:\program files\cmake\bin\cmake -G "Visual Studio 16 2019 Win64" ..
-    - c:\program files\cmake\bin\cmake --build . --config Release
-    - c:\program files\cmake\bin\ctest -C Release
+  - mkdir build-windows
+  - cd build-windows
+  - c:\program files\cmake\bin\cmake -G "Visual Studio 16 2019 Win64" ..
+  - c:\program files\cmake\bin\cmake --build . --config Release
+  - c:\program files\cmake\bin\ctest -C Release
   artifacts:
     reports:
       junit:
-        - build-*\\Examples\\CI\\*-Results.xml
-        - build-*\\Tests\\*-Results.xml
-
-pages:
-  stage: release
-  image: alpine:3.14
-  needs:
-    - alpine
-  script:
-  - doxygen Doxyfile
-  - mv doc/html/ public/
-  artifacts:
-    paths:
-    - public
+      - build-*\\Examples\\CI\\*-Results.xml
+      - build-*\\Tests\\*-Results.xml
+  variables: {}
+stages:
+- build
+- test
+- results
+- release
+variables: {}
+default: {}
