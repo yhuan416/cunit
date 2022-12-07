@@ -99,7 +99,8 @@ windows:
     - windows
     - windows-1809
   before_script:
-    - choco install cmake.install -y --installargs '"ADD_CMAKE_TO_PATH=User"'
+    - choco install cmake.install -y --installargs 'ADD_CMAKE_TO_PATH=System'
+    - RefreshEnv
   script:
     - mkdir build-windows
     - cd build-windows
