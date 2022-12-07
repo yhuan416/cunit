@@ -104,9 +104,9 @@ windows:
   script:
     - mkdir build-windows
     - cd build-windows
-    - "c:\program files\cmake\bin\cmake" -G "Visual Studio 16 2019 Win64" ..
-    - "c:\program files\cmake\bin\cmake" --build . --config Release
-    - "c:\program files\cmake\bin\ctest" -C Release
+    - c:\program files\cmake\bin\cmake -G "Visual Studio 16 2019 Win64" ..
+    - c:\program files\cmake\bin\cmake --build . --config Release
+    - c:\program files\cmake\bin\ctest -C Release
   artifacts:
     reports:
       junit:
