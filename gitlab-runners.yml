@@ -10,3 +10,4 @@
   before_script:
     - brew update
     - brew install cmake
+    - python3 -m pip install junit2html
