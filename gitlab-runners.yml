@@ -7,3 +7,6 @@
   tags:
     - saas-macos-medium-m1
   image: macos-12-xcode-14
+  before_script:
+    - brew update
+    - brew install cmake
