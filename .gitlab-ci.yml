@@ -46,7 +46,19 @@ apple:
   extends:
     - .macos-job
     - .cunit-build-template-base 
-  
+
+windows:
+  tags:
+    - shared-windows
+    - windows
+    - windows-1809
+  script:
+    - mkdir build-windows
+    - cd build-windows
+    - cmake ..
+    - cmake --build .
+    - ctest
+
 
 ubuntu2004:
   extends:
