@@ -1,4 +1,3 @@
-
 # CUnit : A Unit Testing Framework
 			               
 http://gitlab.com/cunity/cunit - forked from http://cunit.sourceforge.net
@@ -43,7 +42,7 @@ more of the project gets included in the CMake builds.
 On gitlab.com, CUnit is regularly built on the following platforms:
 
   * Windows
-  * MacoOS
+  * MacOS
   * Ubuntu 20.04
   * Alpine Linux
 
