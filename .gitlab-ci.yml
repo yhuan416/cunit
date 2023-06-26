@@ -56,10 +56,9 @@ windows:
   script:
     - mkdir build-windows
     - cd build-windows
-    - cmake -DCMAKE_BUILD_TYPE=Release .. 
+    - cmake .. 
     - cmake --build .
-    - ctest -C Release
-
+    - ctest -C Debug
 
 ubuntu2004:
   extends:
