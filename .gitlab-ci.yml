@@ -48,6 +48,7 @@ apple:
     - .cunit-build-template-base 
 
 windows:
+  stage: build
   tags:
     - shared-windows
     - windows
