@@ -11,10 +11,9 @@ stages:
   - results
   - release
 
-.cunit-build-template:
+
+.cunit-build-template-base:
   stage: build
-  extends:
-    - .docker-linux-job
   script:
     - mkdir build-${CI_JOB_NAME}
     - cd build-${CI_JOB_NAME}
@@ -37,10 +36,17 @@ stages:
       - build-*/Examples/CI/*-Results.xml
       - build-*/Tests/*-Results.xml
 
+
+.cunit-build-template:
+  extends:
+    - .docker-linux-job
+    - .cunit-build-template-base
+
 apple:
   extends:
     - .macos-job
-    - .cunit-build-template
+    - .cunit-build-template-base 
+  
 
 ubuntu2004:
   extends:
