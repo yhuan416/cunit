@@ -42,11 +42,10 @@ more of the project gets included in the CMake builds.
 
 On gitlab.com, CUnit is regularly built on the following platforms:
 
-  * Ubuntu AMD64 18.04
-  * Ubuntu AMD64 17.10
-  * Ubuntu Power9 19.04
-  * Solaris AMD64 11 
-  * Windows VS2015
+  * Windows
+  * MacoOS
+  * Ubuntu 20.04
+  * Alpine Linux
 
 ## Building CUnit
 
